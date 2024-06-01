@@ -1,4 +1,4 @@
-# Virtula TicTacToe 
+# Virtul TicTacToe 
 
 ## Overview
 System designed for the simple tic-tac-toe game using the webcam to capture users hand gestitures. Users are able to paly the game on a virtual grid on screen and do their moves with the hand gestiture, the system is able to recognize these gestitures through the video camera and perform the corresponding instruction. 
