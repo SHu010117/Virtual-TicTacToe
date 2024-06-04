@@ -5,14 +5,14 @@ import math
 
 # Define the size and properties of the Tic Tac Toe grid
 line_thickness = 2
-line_color = (100, 100, 100)  # Black color
+line_color = (100, 100, 100) 
 
 class HandControlTicTacToe:
     def __init__(self):
         # initialize medialpipe
         self.mp_drawing = mp.solutions.drawing_utils
-        self.mp_drawing_styles = mp.solutions.drawing_styles
         self.mp_hands = mp.solutions.hands
+        self.fingers = []
 
         # activate draw function
         self.draw_active = False
@@ -21,6 +21,32 @@ class HandControlTicTacToe:
         self.canvas = np.zeros((480, 640, 3), dtype=np.uint8)
         self.xp = 0
         self.yp = 0
+    
+    def fingers_up(self, hand_landmarks):
+        """
+        Determine which fingers are up.
+        
+        Arguments:
+        hand_landmarks -- list of hand landmarks
+
+        Returns:
+        list of booleans representing whether each finger is up (True) or down (False)
+        """
+        fingers = []
+
+        # Thumb (landmark 4 is the tip, landmark 3 is the knuckle)
+        if hand_landmarks.landmark[self.mp_hands.HandLandmark.THUMB_TIP].x < hand_landmarks.landmark[self.mp_hands.HandLandmark.THUMB_IP].x:
+            fingers.append(True)
+        else:
+            fingers.append(False)
+
+        # Fingers (landmark 8 is the tip, landmark 6 is the pip joint)
+        fingers.append(hand_landmarks.landmark[self.mp_hands.HandLandmark.INDEX_FINGER_TIP].y < hand_landmarks.landmark[self.mp_hands.HandLandmark.INDEX_FINGER_PIP].y)
+        fingers.append(hand_landmarks.landmark[self.mp_hands.HandLandmark.MIDDLE_FINGER_TIP].y < hand_landmarks.landmark[self.mp_hands.HandLandmark.MIDDLE_FINGER_PIP].y)
+        fingers.append(hand_landmarks.landmark[self.mp_hands.HandLandmark.RING_FINGER_TIP].y < hand_landmarks.landmark[self.mp_hands.HandLandmark.RING_FINGER_PIP].y)
+        fingers.append(hand_landmarks.landmark[self.mp_hands.HandLandmark.PINKY_TIP].y < hand_landmarks.landmark[self.mp_hands.HandLandmark.PINKY_PIP].y)
+
+        return fingers
 
     # 主函数
     def recognize(self):
@@ -77,66 +103,35 @@ class HandControlTicTacToe:
                         self.mp_drawing.draw_landmarks(
                             self.image,
                             hand_landmarks,
-                            self.mp_hands.HAND_CONNECTIONS,
-                            self.mp_drawing_styles.get_default_hand_landmarks_style(),
-                            self.mp_drawing_styles.get_default_hand_connections_style())
+                            self.mp_hands.HAND_CONNECTIONS)
+                        
+                        self.fingers = self.fingers_up(hand_landmarks)
 
-                        # analys the fingers and save their position
-                        landmark_list = []
 
-                        # hands' position matrix
-                        paw_x_list = []
-                        paw_y_list = []
-                        for landmark_id, finger_axis in enumerate(
-                                hand_landmarks.landmark):
-                            landmark_list.append([
-                                landmark_id, finger_axis.x, finger_axis.y,
-                                finger_axis.z
-                            ])
-                            paw_x_list.append(finger_axis.x)
-                            paw_y_list.append(finger_axis.y)
-                        if landmark_list:
-                            # convertion to pixel coordinates
-                            ratio_x_to_pixel = lambda x: math.ceil(x * resize_w)
-                            ratio_y_to_pixel = lambda y: math.ceil(y * resize_h)
+                        # analys the fingers and save their position, but we actuallt need only the index finger tip to draw
                             
-                            # middle fingers tip position
-                            middle_finger_tip = landmark_list[12]
-                            middle_finger_tip_x = ratio_x_to_pixel(middle_finger_tip[1])
-                            middle_finger_tip_y = ratio_y_to_pixel(middle_finger_tip[2])
+                        
+                        # Conversion to pixel coordinates
+                        ratio_x_to_pixel = lambda x: math.ceil(x * resize_w)
+                        ratio_y_to_pixel = lambda y: math.ceil(y * resize_h)
 
-                            # index finger tip position
-                            index_finger_tip = landmark_list[8]
-                            index_finger_tip_x = ratio_x_to_pixel(index_finger_tip[1])
-                            index_finger_tip_y = ratio_y_to_pixel(index_finger_tip[2])
-                            # middle point between 2 finger tips
-                            between_finger_tip = (middle_finger_tip_x + index_finger_tip_x) // 2, (
-                                        middle_finger_tip_y + index_finger_tip_y) // 2
-                            # print(middle_finger_tip_x)
-                            thumb_finger_point = (middle_finger_tip_x, middle_finger_tip_y)
-                            index_finger_point = (index_finger_tip_x, index_finger_tip_y)
-                            # draw the two finger tips point
-                            circle_func = lambda point: cv2.circle(self.image, point, 10, (255, 0, 255), -1)
-                            self.image = circle_func(thumb_finger_point)
-                            self.image = circle_func(index_finger_point)
-                            self.image = circle_func(between_finger_tip)
-                            # draw the line between finger tips
-                            self.image = cv2.line(self.image, thumb_finger_point, index_finger_point, (255, 0, 255), 3)
-                            # get the line segment's length
-                            line_len = math.hypot((index_finger_tip_x - middle_finger_tip_x),
-                                                  (index_finger_tip_y - middle_finger_tip_y))
-                            
-                            
-                    if line_len < 60:
+                        # Index finger tip position
+                        index_finger_tip = hand_landmarks.landmark[self.mp_hands.HandLandmark.INDEX_FINGER_TIP]
+                        index_finger_tip_x = ratio_x_to_pixel(index_finger_tip.x)
+                        index_finger_tip_y = ratio_y_to_pixel(index_finger_tip.y)
+                        index_finger_point = (index_finger_tip_x, index_finger_tip_y)
+                        
+                        
+                    if self.fingers[1] and not self.fingers[2]:
                         # we can draw
                         # draw function to be implemented correctly
                         if (self.xp == 0) and (self.yp == 0):
-                            self.xp, self.yp = between_finger_tip
+                            self.xp, self.yp = index_finger_point
                         start_point = (int(self.xp), int(self.yp))                                
-                        end_point = (int(between_finger_tip[0]), int(between_finger_tip[1]))
+                        end_point = (int(index_finger_tip_x), int(index_finger_tip_y))
                         cv2.line(self.canvas, start_point, end_point, line_color, 5)
                     
-                    self.xp, self.yp = between_finger_tip[0], between_finger_tip[1]
+                    self.xp, self.yp = index_finger_tip_x, index_finger_tip_y
                 
                 # Prepare the canvas for overlay
                 grayscale_canvas = cv2.cvtColor(self.canvas, cv2.COLOR_BGR2GRAY)
