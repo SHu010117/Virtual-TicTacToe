@@ -5,7 +5,7 @@ import math
 
 # Define the size and properties of the Tic Tac Toe grid
 line_thickness = 2
-line_color = (100, 100, 100) 
+line_color = (0, 100, 100)
 
 class HandControlTicTacToe:
     def __init__(self):
@@ -18,7 +18,8 @@ class HandControlTicTacToe:
         self.draw_active = False
         self.image = None
 
-        self.canvas = np.zeros((480, 640, 3), dtype=np.uint8)
+        # self.canvas = np.zeros((720, 1280, 3), dtype=np.uint8)
+        self.canvas = None
         self.xp = 0
         self.yp = 0
     
@@ -52,25 +53,30 @@ class HandControlTicTacToe:
     def recognize(self):
         
 
-        # OpenCV video capture
+        # OpenCV video capture. Initialize video capture from the webcam.
         cap = cv2.VideoCapture(0)
-        # sizes
+
+        # Get the video frame size
         resize_w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         resize_h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        
+        self.canvas = np.zeros((resize_h, resize_w, 3), dtype=np.uint8)
+
+
         with self.mp_hands.Hands(min_detection_confidence=0.5,
                                  min_tracking_confidence=0.5,
                                  max_num_hands=2) as hands:
             
             while cap.isOpened():
 
-                # initial image
+                # Capture frame by frame
                 success, self.image = cap.read()
                 if not success:
                     print("Ignoring empty camera frame.")
                     continue
 
-                self.image = cv2.resize(self.image, (resize_w, resize_h))
+
+                # In teoria non serve.
+                # self.image = cv2.resize(self.image, (800, 600))
                 
                 # Calculate positions for the grid lines
                 third_width = resize_w // 3
@@ -95,6 +101,7 @@ class HandControlTicTacToe:
 
                 self.image.flags.writeable = True
                 self.image = cv2.cvtColor(self.image, cv2.COLOR_RGB2BGR)
+
                 # check if there a hand to be captured
                 if results.multi_hand_landmarks:
                     # for the whole hand
@@ -137,6 +144,7 @@ class HandControlTicTacToe:
                 grayscale_canvas = cv2.cvtColor(self.canvas, cv2.COLOR_BGR2GRAY)
                 _, canvas_inv = cv2.threshold(grayscale_canvas, 50, 255, cv2.THRESH_BINARY_INV)
                 canvas_inv = cv2.cvtColor(canvas_inv, cv2.COLOR_GRAY2BGR)
+
                 self.image = cv2.bitwise_and(self.image, canvas_inv)
                 self.image = cv2.bitwise_or(self.image, self.canvas)
                 
