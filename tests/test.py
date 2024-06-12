@@ -32,7 +32,7 @@ def is_thumb_up_and_fist_closed(hand_landmarks):
         (min(thumb_mcp.x, ring_mcp.x) - EPSILON <= ring_tip.x <= max(thumb_cmc.x, ring_mcp.x) + EPSILON) and
         (min(thumb_mcp.x, pinky_mcp.x) - EPSILON <= pinky_tip.x <= max(thumb_cmc.x, pinky_mcp.x) + EPSILON)
     )
-    print(thumb_mcp.x)
+
     return is_thumb_up and is_fist_closed
 
 # Aprire la webcam

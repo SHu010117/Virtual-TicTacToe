@@ -14,7 +14,8 @@ WHITE = (255, 255, 255)
 DGREEN = (24,60,37)
 DGREEN2 = (24,60,37)
 
-
+# Costante di errore
+EPSILON = 0.03
 
 # Inizializzazione di Pygame
 pygame.init()
@@ -49,7 +50,7 @@ mp_draw = mp.solutions.drawing_utils
 
 
 
-def draw_menu():
+def draw_menu(show_text, indexpos):
     # WIN.fill((245,255,255))
 
     # Scritta principale
@@ -58,19 +59,63 @@ def draw_menu():
     WIN.blit(text, (WIDTH//2 - text.get_width()//2, (HEIGHT//8)))
 
     # Scritta secondaria
-    font = pygame.font.Font(PIXELPATH, 24)
-    text = font.render('Pollice in sù per iniziare', True, DGREEN2)
-    WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, (HEIGHT // 4) + 65))
+    if show_text:
+        font = pygame.font.Font(PIXELPATH, 24)
+        text = font.render('Pollice in sù per iniziare', True, DGREEN2)
+        WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, (HEIGHT // 4) + 65))
+
+    if indexpos:
+        pygame.draw.circle(WIN, (255, 0, 0), indexpos, 3)
 
     # Aggiorna l'intera schermata
     pygame.display.flip()
 
 
 
+def fingers_up(hand_landmarks):
+    fingers = []
+    if hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x < hand_landmarks.landmark[
+        mp_hands.HandLandmark.THUMB_IP].x:
+        fingers.append(True)
+    else:
+        fingers.append(False)
+
+    fingers.append(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y < hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_PIP].y)
+    fingers.append(hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].y < hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_PIP].y)
+    fingers.append(hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP].y < hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_PIP].y)
+    fingers.append(hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].y < hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_PIP].y)
 
 
+    return fingers
 
-# TODO: implmentare funzione che riconosca il pollice alzato
+
+def is_thumb_up_and_fist_closed(hand_landmarks):
+    # Punti chiave dita
+    thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
+    thumb_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP]
+    thumb_cmc = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC]
+    index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+    index_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+    middle_tip = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+    middle_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
+    ring_tip = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP]
+    ring_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP]
+    pinky_tip = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
+    pinky_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP]
+
+    # Verificare se il pollice è alzato
+    is_thumb_up = thumb_tip.y < thumb_mcp.y
+
+    # Verificare se il pugno è chiusto:
+    is_fist_closed = (
+            (min(thumb_mcp.x, index_mcp.x) - EPSILON <= index_tip.x <= max(thumb_cmc.x, index_mcp.x) + EPSILON) and
+            (min(thumb_mcp.x, middle_mcp.x) - EPSILON <= middle_tip.x <= max(thumb_cmc.x, middle_mcp.x) + EPSILON) and
+            (min(thumb_mcp.x, ring_mcp.x) - EPSILON <= ring_tip.x <= max(thumb_cmc.x, ring_mcp.x) + EPSILON) and
+            (min(thumb_mcp.x, pinky_mcp.x) - EPSILON <= pinky_tip.x <= max(thumb_cmc.x, pinky_mcp.x) + EPSILON)
+    )
+
+    return is_thumb_up and is_fist_closed
+
 
 
 
@@ -80,9 +125,16 @@ def draw_menu():
 
 menu = True
 running = True
+show_text = True
+last_toggle_time = pygame.time.get_ticks()
 
 # Main loop
 while running:
+    current_time = pygame.time.get_ticks()
+    if current_time - last_toggle_time > 250:  # 0.25 s
+        show_text = not show_text
+        last_toggle_time = current_time
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -91,7 +143,23 @@ while running:
     # Logica del gioco
     ret, frame = cap.read()
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    frame = cv2.flip(frame, 1)
     res = hands.process(frame)
+    indexpos = None
+    if res.multi_hand_landmarks:
+        for hand_landmarks in res.multi_hand_landmarks:
+            # Controllo se il pollice è alzato e il pugno chiuso
+            if is_thumb_up_and_fist_closed(hand_landmarks):
+                print("Pollice alzato")
+
+            # Controllo se l'indice è alzato e prendo la posizione.
+            fingers = fingers_up(hand_landmarks)
+            if fingers[1]:
+                index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+                cx, cy = int(index_tip.x * WIDTH), int(index_tip.y * HEIGHT)
+                indexpos = (cx, cy)
+
+
     if menu:
         '''
         ret, video_frame = video_capture.read()
@@ -105,10 +173,11 @@ while running:
         WIN.blit(video_frame_pygame, (0, 0))
         '''
         WIN.blit(background_image, (0, 0))
-        draw_menu()
-        if res.multi_hand_landmarks:
-            for hand in res.multi_hand_landmarks:
-                print("dajeroma")
+        draw_menu(show_text, indexpos)
+
+
+
+
 
 
 
