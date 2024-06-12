@@ -5,7 +5,7 @@ import mediapipe as mp
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(static_image_mode=False, max_num_hands=1, min_detection_confidence=0.5)
 mp_drawing = mp.solutions.drawing_utils
-EPSILON = 0.03
+EPSILON = 0
 
 def is_thumb_up_and_fist_closed(hand_landmarks):
     # Punti chiave dita
@@ -27,10 +27,10 @@ def is_thumb_up_and_fist_closed(hand_landmarks):
 
     # Verificare se il pugno è chiusto:
     is_fist_closed = (
-        (min(thumb_mcp.x,  index_mcp.x) - EPSILON <= index_tip.x <= max(thumb_cmc.x, index_mcp.x) + EPSILON) and
-        (min(thumb_mcp.x, middle_mcp.x) - EPSILON <= middle_tip.x <= max(thumb_cmc.x, middle_mcp.x) + EPSILON) and
-        (min(thumb_mcp.x, ring_mcp.x) - EPSILON <= ring_tip.x <= max(thumb_cmc.x, ring_mcp.x) + EPSILON) and
-        (min(thumb_mcp.x, pinky_mcp.x) - EPSILON <= pinky_tip.x <= max(thumb_cmc.x, pinky_mcp.x) + EPSILON)
+        (min(thumb_mcp.x, index_mcp.x) - EPSILON <= index_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
+        (min(thumb_mcp.x, index_mcp.x) - EPSILON <= middle_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
+        (min(thumb_mcp.x, index_mcp.x) - EPSILON <= ring_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
+        (min(thumb_mcp.x, index_mcp.x) - EPSILON <= pinky_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON)
     )
 
     return is_thumb_up and is_fist_closed
@@ -40,6 +40,7 @@ cap = cv2.VideoCapture(0)
 
 while cap.isOpened():
     ret, frame = cap.read()
+    frame = cv2.flip(frame, 1)
     if not ret:
         break
 
@@ -60,6 +61,7 @@ while cap.isOpened():
             # Controllare se il segno è OK
             if is_thumb_up_and_fist_closed(hand_landmarks):
                 cv2.putText(image, 'OK', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+                print("Pollice alzato")
 
     # Mostrare l'immagine
     cv2.imshow('Hand Tracking', image)

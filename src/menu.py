@@ -1,3 +1,5 @@
+import math
+
 import cv2
 import mediapipe as mp
 import pygame
@@ -15,7 +17,7 @@ DGREEN = (24,60,37)
 DGREEN2 = (24,60,37)
 
 # Costante di errore
-EPSILON = 0.03
+EPSILON = 0
 
 # Inizializzazione di Pygame
 pygame.init()
@@ -35,6 +37,8 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Tic Tac Toe')
 background_image = pygame.image.load('../assets/images/background/prova3.jpeg')
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
+grid_img = pygame.image.load('../assets/images/background/tic.jpg')
+grid_img = pygame.transform.scale(grid_img, (WIDTH, HEIGHT))
 
 
 FPS = 60
@@ -103,15 +107,16 @@ def is_thumb_up_and_fist_closed(hand_landmarks):
     pinky_tip = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
     pinky_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP]
 
+
     # Verificare se il pollice è alzato
     is_thumb_up = thumb_tip.y < thumb_mcp.y
 
     # Verificare se il pugno è chiusto:
     is_fist_closed = (
-            (min(thumb_mcp.x, index_mcp.x) - EPSILON <= index_tip.x <= max(thumb_cmc.x, index_mcp.x) + EPSILON) and
-            (min(thumb_mcp.x, middle_mcp.x) - EPSILON <= middle_tip.x <= max(thumb_cmc.x, middle_mcp.x) + EPSILON) and
-            (min(thumb_mcp.x, ring_mcp.x) - EPSILON <= ring_tip.x <= max(thumb_cmc.x, ring_mcp.x) + EPSILON) and
-            (min(thumb_mcp.x, pinky_mcp.x) - EPSILON <= pinky_tip.x <= max(thumb_cmc.x, pinky_mcp.x) + EPSILON)
+        (min(thumb_mcp.x, index_mcp.x) - EPSILON <= index_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
+        (min(thumb_mcp.x, index_mcp.x) - EPSILON <= middle_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
+        (min(thumb_mcp.x, index_mcp.x) - EPSILON <= ring_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
+        (min(thumb_mcp.x, index_mcp.x) - EPSILON <= pinky_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON)
     )
 
     return is_thumb_up and is_fist_closed
@@ -146,17 +151,21 @@ while running:
     frame = cv2.flip(frame, 1)
     res = hands.process(frame)
     indexpos = None
+
     if res.multi_hand_landmarks:
         for hand_landmarks in res.multi_hand_landmarks:
             # Controllo se il pollice è alzato e il pugno chiuso
             if is_thumb_up_and_fist_closed(hand_landmarks):
                 print("Pollice alzato")
+                menu = False
 
             # Controllo se l'indice è alzato e prendo la posizione.
             fingers = fingers_up(hand_landmarks)
             if fingers[1]:
+                ratio_x_to_pixel = lambda x: math.ceil(x * WIDTH)
+                ratio_y_to_pixel = lambda y: math.ceil(y * HEIGHT)
                 index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
-                cx, cy = int(index_tip.x * WIDTH), int(index_tip.y * HEIGHT)
+                cx, cy = int(ratio_x_to_pixel(index_tip.x)), int(ratio_y_to_pixel(index_tip.y))
                 indexpos = (cx, cy)
 
 
@@ -174,6 +183,15 @@ while running:
         '''
         WIN.blit(background_image, (0, 0))
         draw_menu(show_text, indexpos)
+
+    else:
+        WIN.blit(grid_img, (0, 0))
+        pygame.display.flip()
+
+
+
+
+
 
 
 
