@@ -51,10 +51,21 @@ mp_hands = mp.solutions.hands
 hands = mp_hands.Hands()
 mp_draw = mp.solutions.drawing_utils
 
-def draw_game(indexpos):
-    if indexpos:
-        pygame.draw.circle(WIN, (255, 0, 0), indexpos, 6)
-    # TODO: Creare funzionalità del disegno
+draws = [[]]
+drawNumber = -1
+drawStart = False
+def draw_game(indexpos, draw):
+    if draw:
+        pygame.draw.circle(WIN, (0, 255, 0), indexpos, 7)
+    elif indexpos:
+        pygame.draw.circle(WIN, (255, 0, 0), indexpos, 7)
+
+    for i in range(len(draws)):
+        for j in range(len(draws[i])):
+            if j != 0:
+                pygame.draw.line(WIN, (255, 0, 255), draws[i][j-1], draws[i][j], 7)
+
+
 
     pygame.display.flip()
 
@@ -135,6 +146,7 @@ running = True
 show_text = True
 last_toggle_time = pygame.time.get_ticks()
 
+
 # Main loop
 while running:
     current_time = pygame.time.get_ticks()
@@ -153,7 +165,7 @@ while running:
     frame = cv2.flip(frame, 1)
     res = hands.process(frame)
     indexpos = None
-
+    draw = False
     if res.multi_hand_landmarks:
         for hand_landmarks in res.multi_hand_landmarks:
             # Controllo se il pollice è alzato e il pugno chiuso
@@ -170,10 +182,24 @@ while running:
                 index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
 
                 # In questo modo posso spostare il pallino verso il basso senza che scompaia o faccia cose strane. (Da sistemare)
-                cx = np.interp(int(ratio_x_to_pixel(index_tip.x)), [100, WIDTH - 100], [0, WIDTH])
-                cy = np.interp(int(ratio_y_to_pixel(index_tip.y)), [100, HEIGHT - 100], [0, HEIGHT])
+                cx = np.interp(int(ratio_x_to_pixel(index_tip.x)), [150, WIDTH - 150], [0, WIDTH])
+                cy = np.interp(int(ratio_y_to_pixel(index_tip.y)), [150, HEIGHT - 150], [0, HEIGHT])
 
                 indexpos = (cx, cy)
+
+
+
+            if fingers[1] and not fingers[2]:
+                if not drawStart:
+                    drawStart = True
+                    drawNumber += 1
+                    draws.append([])
+                draws[drawNumber].append(indexpos)
+                draw = True
+            else:
+                drawStart = False
+
+
 
     if menu:
         '''
@@ -192,5 +218,6 @@ while running:
 
     else:
         WIN.blit(grid_img, (0, 0))
-        draw_game(indexpos)
+        draw_game(indexpos, draw)
+
         #pygame.display.flip()
