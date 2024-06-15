@@ -13,8 +13,8 @@ PIXELPATH = '../assets/fonts/public-pixel-font/PublicPixel-E447g.ttf'
 # Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-DGREEN = (24,60,37)
-DGREEN2 = (24,60,37)
+DGREEN = (24, 60, 37)
+DGREEN2 = (24, 60, 37)
 
 # Costante di errore
 EPSILON = 0
@@ -40,7 +40,6 @@ background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 grid_img = pygame.image.load('../assets/images/background/tic.jpg')
 grid_img = pygame.transform.scale(grid_img, (WIDTH, HEIGHT))
 
-
 FPS = 60
 CLOCK = pygame.time.Clock()
 
@@ -52,6 +51,12 @@ mp_hands = mp.solutions.hands
 hands = mp_hands.Hands()
 mp_draw = mp.solutions.drawing_utils
 
+def draw_game(indexpos):
+    if indexpos:
+        pygame.draw.circle(WIN, (255, 0, 0), indexpos, 6)
+    # TODO: Creare funzionalità del disegno
+
+    pygame.display.flip()
 
 
 def draw_menu(show_text, indexpos):
@@ -60,7 +65,7 @@ def draw_menu(show_text, indexpos):
     # Scritta principale
     font = pygame.font.Font(PIXELPATH, 78)
     text = font.render('TIC-TAC-TOE', True, DGREEN)
-    WIN.blit(text, (WIDTH//2 - text.get_width()//2, (HEIGHT//8)))
+    WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, (HEIGHT // 8)))
 
     # Scritta secondaria
     if show_text:
@@ -69,11 +74,10 @@ def draw_menu(show_text, indexpos):
         WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, (HEIGHT // 4) + 65))
 
     if indexpos:
-        pygame.draw.circle(WIN, (255, 0, 0), indexpos, 3)
+        pygame.draw.circle(WIN, (255, 0, 0), indexpos, 6)
 
     # Aggiorna l'intera schermata
     pygame.display.flip()
-
 
 
 def fingers_up(hand_landmarks):
@@ -84,11 +88,14 @@ def fingers_up(hand_landmarks):
     else:
         fingers.append(False)
 
-    fingers.append(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y < hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_PIP].y)
-    fingers.append(hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].y < hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_PIP].y)
-    fingers.append(hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP].y < hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_PIP].y)
-    fingers.append(hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].y < hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_PIP].y)
-
+    fingers.append(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y < hand_landmarks.landmark[
+        mp_hands.HandLandmark.INDEX_FINGER_PIP].y)
+    fingers.append(hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].y < hand_landmarks.landmark[
+        mp_hands.HandLandmark.MIDDLE_FINGER_PIP].y)
+    fingers.append(hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP].y < hand_landmarks.landmark[
+        mp_hands.HandLandmark.RING_FINGER_PIP].y)
+    fingers.append(hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].y < hand_landmarks.landmark[
+        mp_hands.HandLandmark.PINKY_PIP].y)
 
     return fingers
 
@@ -107,25 +114,20 @@ def is_thumb_up_and_fist_closed(hand_landmarks):
     pinky_tip = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
     pinky_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP]
 
-
     # Verificare se il pollice è alzato
     is_thumb_up = thumb_tip.y < thumb_mcp.y
 
     # Verificare se il pugno è chiusto:
     is_fist_closed = (
-        (min(thumb_mcp.x, index_mcp.x) - EPSILON <= index_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
-        (min(thumb_mcp.x, index_mcp.x) - EPSILON <= middle_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
-        (min(thumb_mcp.x, index_mcp.x) - EPSILON <= ring_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
-        (min(thumb_mcp.x, index_mcp.x) - EPSILON <= pinky_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON)
+            (min(thumb_mcp.x, index_mcp.x) - EPSILON <= index_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
+            (min(thumb_mcp.x, index_mcp.x) - EPSILON <= middle_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
+            (min(thumb_mcp.x, index_mcp.x) - EPSILON <= ring_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
+            (min(thumb_mcp.x, index_mcp.x) - EPSILON <= pinky_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON)
     )
 
     return is_thumb_up and is_fist_closed
 
 
-
-
-# TODO: implementare funzione che riconosca un segno (da decidere) per abbassare la musica di sottofondo
-# TODO: implementare funzione che riconosca un segno (da decidere) per uscire dal gioco.
 
 
 menu = True
@@ -161,13 +163,17 @@ while running:
 
             # Controllo se l'indice è alzato e prendo la posizione.
             fingers = fingers_up(hand_landmarks)
+
             if fingers[1]:
                 ratio_x_to_pixel = lambda x: math.ceil(x * WIDTH)
                 ratio_y_to_pixel = lambda y: math.ceil(y * HEIGHT)
                 index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
-                cx, cy = int(ratio_x_to_pixel(index_tip.x)), int(ratio_y_to_pixel(index_tip.y))
-                indexpos = (cx, cy)
 
+                # In questo modo posso spostare il pallino verso il basso senza che scompaia o faccia cose strane. (Da sistemare)
+                cx = np.interp(int(ratio_x_to_pixel(index_tip.x)), [100, WIDTH - 100], [0, WIDTH])
+                cy = np.interp(int(ratio_y_to_pixel(index_tip.y)), [100, HEIGHT - 100], [0, HEIGHT])
+
+                indexpos = (cx, cy)
 
     if menu:
         '''
@@ -186,16 +192,5 @@ while running:
 
     else:
         WIN.blit(grid_img, (0, 0))
-        pygame.display.flip()
-
-
-
-
-
-
-
-
-
-
-
-
+        draw_game(indexpos)
+        #pygame.display.flip()
