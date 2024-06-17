@@ -85,16 +85,12 @@ class HandControlTicTacToe:
                         landmark_list = []
 
                         # hands' position matrix
-                        paw_x_list = []
-                        paw_y_list = []
                         for landmark_id, finger_axis in enumerate(
                                 hand_landmarks.landmark):
                             landmark_list.append([
                                 landmark_id, finger_axis.x, finger_axis.y,
                                 finger_axis.z
                             ])
-                            paw_x_list.append(finger_axis.x)
-                            paw_y_list.append(finger_axis.y)
                         if landmark_list:
                             # convertion to pixel coordinates
                             ratio_x_to_pixel = lambda x: math.ceil(x * resize_w)
