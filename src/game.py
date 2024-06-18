@@ -102,7 +102,7 @@ def draw_game(win, index_pos, draw, arr, chars, draws):
     for i in range(len(draws)):
         for j in range(len(draws[i])):
             if j != 0:
-                pygame.draw.line(win, (255, 0, 255), draws[i][j - 1], draws[i][j], 7)
+                pygame.draw.line(win, (255, 255, 255), draws[i][j - 1], draws[i][j], 7)
                 check_cell(arr, draws[i][j - 1], chars)
 
     pygame.display.flip()
