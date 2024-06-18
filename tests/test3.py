@@ -16,18 +16,20 @@ class OurCNN(nn.Module):
     def __init__(self):
         super(OurCNN, self).__init__()
         self.cnn = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=3, padding=1),
+            nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
         )
 
         self.mlp = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(12544, 128),
+            nn.Linear(12544, 800),
             nn.ReLU(),
-            nn.Linear(128, 2)
+            nn.Linear(800, 120),
+            nn.ReLU(),
+            nn.Linear(120, 62)
         )
 
     def forward(self, x):
@@ -40,8 +42,8 @@ model = OurCNN().to(device)
 
 
 
-image_path = "test_img/Screenshot 2024-06-18 alle 15.51.21.png"
-model.load_state_dict(torch.load('../models/X_O_CNN.pth',  map_location=torch.device('cpu')))
+image_path = "test_img/Screenshot 2024-06-18 alle 22.05.45.png"
+model.load_state_dict(torch.load('../models/OurCNN.pth',  map_location=torch.device('cpu')))
 model.eval()
 
 transform = transforms.Compose([
@@ -61,6 +63,20 @@ with torch.no_grad():
     output = model(image)
     probabilities = F.softmax(output, dim=1)
     _, predicted = torch.max(output, 1)
+    probabilities = probabilities.cpu().numpy()[0]
+
+
+
+class_names = [
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',  # 0-9
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',  # A-Z
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'   # a-z
+]
+
+for i, prob in enumerate(probabilities):
+    print(f"Class {i} ({class_names[i]}): {prob:.4f}")
+
+'''
 
 label = predicted.item()
 probability_O = probabilities[0][0].item()
@@ -72,3 +88,5 @@ if label == 0:
 else:
     print(f"La lettera è X con una probabilità del {probability_X * 100:.2f}%")
     print(f"Probabilità di O: {probability_O * 100:.2f}%")
+    
+'''
