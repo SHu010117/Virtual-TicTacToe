@@ -27,9 +27,6 @@ pygame.mixer.init()
 # pygame.mixer.music.load('../assets/music/arcade-party-173553.mp3')
 # pygame.mixer.music.play(-1)  # loop
 
-# Video background
-# video_capture = cv2.VideoCapture('../assets/videos/pika.mp4')
-# frame_rate = video_capture.get(cv2.CAP_PROP_FPS)
 
 # Creazione Window
 WIDTH, HEIGHT = 1000, 680
@@ -51,10 +48,89 @@ mp_hands = mp.solutions.hands
 hands = mp_hands.Hands()
 mp_draw = mp.solutions.drawing_utils
 
+
+# Inizializzazione dei 'disegni'
 draws = [[]]
 drawNumber = -1
 drawStart = False
-def draw_game(indexpos, draw):
+
+
+intercection_points = [(373,182),(583,182),(373,347),(583,347)]
+chars = ["O", "X"]
+turn = 0
+grid_array = [["","",""],["","",""],["","",""]]
+ratio_x_to_pixel = lambda x: math.ceil(x * WIDTH)
+ratio_y_to_pixel = lambda y: math.ceil(y * HEIGHT)
+
+def check_cell(arr, xy, chars):
+    global turn
+    if xy[0] <= 373 and xy[1] <= 182:
+        if arr[0][0] == "":
+            arr[0][0] = chars[turn]
+            turn = (turn + 1)%2
+            print(arr)
+    elif xy[0] <= 583 and xy[1] <= 182:
+        if arr[0][1] == "":
+            arr[0][1] = chars[turn]
+            turn = (turn + 1)%2
+            print(arr)
+    elif xy[0] > 583 and xy[1] <= 182:
+        if arr[0][2] == "":
+            arr[0][2] = chars[turn]
+            turn = (turn + 1)%2
+            print(arr)
+    elif xy[0] <= 373 and xy[1] <= 347:
+        if arr[1][0] == "":
+            arr[1][0] = chars[turn]
+            turn = (turn + 1)%2
+            print(arr)
+    elif xy[0] <= 583 and xy[1] <= 347:
+        if arr[1][1] == "":
+            arr[1][1] = chars[turn]
+            turn = (turn + 1)%2
+            print(arr)
+    elif xy[0] > 583 and xy[1] <= 347:
+        if arr[1][2] == "":
+            arr[1][2] = chars[turn]
+            turn = (turn + 1)%2
+            print(arr)
+    elif xy[0] <= 373 and xy[1] > 347:
+        if arr[2][0] == "":
+            arr[2][0] = chars[turn]
+            turn = (turn + 1)%2
+            print(arr)
+    elif xy[0] <= 583 and xy[1] > 347:
+        if arr[2][1] == "":
+            arr[2][1] = chars[turn]
+            turn = (turn + 1)%2
+            print(arr)
+    else:
+        if arr[2][2] == "":
+            arr[2][2] = chars[turn]
+            turn = (turn + 1)%2
+            print(arr)
+
+
+def check_winner(grid):
+    # Check rows
+    for row in grid:
+        if row[0] == row[1] == row[2] and row[0] != "":
+            print(row[0] + " won")
+
+    # Check columns
+    for col in range(3):
+        if grid[0][col] == grid[1][col] == grid[2][col] and grid[0][col] != "":
+            print(grid[0][col] + " won")
+
+    # Check diagonals
+    if grid[0][0] == grid[1][1] == grid[2][2] and grid[0][0] != "":
+        print(grid[0][0] + " won")
+    if grid[0][2] == grid[1][1] == grid[2][0] and grid[0][2] != "":
+        print(grid[0][2] + " won")
+
+
+
+def draw_game(indexpos, draw, arr, chars):
     if draw:
         pygame.draw.circle(WIN, (0, 255, 0), indexpos, 7)
     elif indexpos:
@@ -64,8 +140,7 @@ def draw_game(indexpos, draw):
         for j in range(len(draws[i])):
             if j != 0:
                 pygame.draw.line(WIN, (255, 0, 255), draws[i][j-1], draws[i][j], 7)
-
-
+                check_cell(arr, draws[i][j - 1], chars)
 
     pygame.display.flip()
 
@@ -115,15 +190,11 @@ def is_thumb_up_and_fist_closed(hand_landmarks):
     # Punti chiave dita
     thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
     thumb_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP]
-    thumb_cmc = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC]
     index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
     index_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP]
     middle_tip = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
-    middle_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP]
     ring_tip = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP]
-    ring_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP]
     pinky_tip = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
-    pinky_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP]
 
     # Verificare se il pollice è alzato
     is_thumb_up = thumb_tip.y < thumb_mcp.y
@@ -189,7 +260,7 @@ while running:
 
 
 
-            if fingers[1] and not fingers[2]:
+            if fingers[1] and not fingers[2] and not menu:
                 if not drawStart:
                     drawStart = True
                     drawNumber += 1
@@ -202,22 +273,10 @@ while running:
 
 
     if menu:
-        '''
-        ret, video_frame = video_capture.read()
-        if not ret:
-            # Se il video è terminato, ricomincia dall'inizio
-            video_capture.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            ret, video_frame = video_capture.read()
-        video_frame_rgb = cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
-        video_frame_pygame = pygame.image.frombuffer(video_frame_rgb.tobytes(), video_frame_rgb.shape[1::-1], 'RGB')
-        video_frame_pygame = pygame.transform.scale(video_frame_pygame, (WIDTH, HEIGHT))
-        WIN.blit(video_frame_pygame, (0, 0))
-        '''
         WIN.blit(background_image, (0, 0))
         draw_menu(show_text, indexpos)
 
     else:
         WIN.blit(grid_img, (0, 0))
-        draw_game(indexpos, draw)
-
-        #pygame.display.flip()
+        draw_game(indexpos, draw, grid_array, chars)
+        check_winner(grid_array)

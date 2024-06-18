@@ -1,1 +1,0 @@
-# logica principale di tic tac toe. Bisogna quindi fondere il codice di Main.py e integrarlo con pygame.
