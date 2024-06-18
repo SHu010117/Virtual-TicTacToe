@@ -4,6 +4,7 @@ from torchvision.transforms import ToTensor
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
+import torch.nn.functional as F
 
 
 # get the best device for computation
@@ -19,13 +20,14 @@ class OurCNN(nn.Module):
             nn.ReLU(),
             nn.Conv2d(32, 64, kernel_size=3, padding=1),
             nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
         self.mlp = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(50176, 512),
+            nn.Linear(12544, 128),
             nn.ReLU(),
-            nn.Linear(512, 62)
+            nn.Linear(128, 2)
         )
 
     def forward(self, x):
@@ -39,23 +41,34 @@ model = OurCNN().to(device)
 
 
 image_path = "./Otest.png"
-model = OurCNN()
-model.load_state_dict(torch.load('../models/X_O_recognition.pth',  map_location=torch.device('cpu')))
+model.load_state_dict(torch.load('../models/X_O_CNN.pth',  map_location=torch.device('cpu')))
 model.eval()
 
 transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=1),
-    transforms.Resize((28, 28)),
-    transforms.ToTensor()
+    transforms.Resize((28, 28)),  # Assicurati che l'immagine sia 28x28
+    transforms.ToTensor(),
+    transforms.Normalize((0.5,), (0.5,))
 ])
 
 image = Image.open(image_path)
 image = transform(image).unsqueeze(0)
 
 
-with torch.no_grad():
-    outputs = model(image)
-    _, predicted = torch.max(outputs.data, 1)
+image = image.to(device)
 
-predicted_letter = chr(predicted.item() + 96)
-print(predicted_letter)
+with torch.no_grad():
+    output = model(image)
+    probabilities = F.softmax(output, dim=1)
+    _, predicted = torch.max(output, 1)
+
+label = predicted.item()
+probability_O = probabilities[0][0].item()
+probability_X = probabilities[0][1].item()
+
+if label == 0:
+    print(f"La lettera è O con una probabilità del {probability_O * 100:.2f}%")
+    print(f"Probabilità di X: {probability_X * 100:.2f}%")
+else:
+    print(f"La lettera è X con una probabilità del {probability_X * 100:.2f}%")
+    print(f"Probabilità di O: {probability_O * 100:.2f}%")
