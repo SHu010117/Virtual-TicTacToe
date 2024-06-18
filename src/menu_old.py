@@ -54,7 +54,7 @@ drawNumber = -1
 drawStart = False
 
 
-intercection_points = [(373,182),(583,182),(373,347),(583,347)]
+intercection_points = [(391,182),(610,182),(391,420),(610,420)]
 chars = ["O", "X"]
 turn = 0
 grid_array = [["","",""],["","",""],["","",""]]
@@ -67,54 +67,54 @@ def print_game(arr):
 
 def check_cell(arr, xy, chars):
     global turn
-    if xy[0] <= 373 and xy[1] <= 182:
+    if xy[0] <= 391 and xy[1] <= 182:
         if arr[0][0] == "":
             arr[0][0] = chars[turn]
             turn = (turn + 1)%2
             print_game(arr)
-    elif xy[0] <= 583 and xy[1] <= 182:
+    elif xy[0] <= 610 and xy[1] <= 182:
         if arr[0][1] == "":
             arr[0][1] = chars[turn]
             turn = (turn + 1)%2
             print(f"----- TURNO GIOCATORE {turn} -----")
             print_game(arr)
 
-    elif xy[0] > 583 and xy[1] <= 182:
+    elif xy[0] > 610 and xy[1] <= 182:
         if arr[0][2] == "":
             arr[0][2] = chars[turn]
             turn = (turn + 1)%2
             print(f"----- TURNO GIOCATORE {turn} -----")
             print_game(arr)
 
-    elif xy[0] <= 373 and xy[1] <= 347:
+    elif xy[0] <= 391 and xy[1] <= 420:
         if arr[1][0] == "":
             arr[1][0] = chars[turn]
             turn = (turn + 1)%2
             print(f"----- TURNO GIOCATORE {turn} -----")
             print_game(arr)
 
-    elif xy[0] <= 583 and xy[1] <= 347:
+    elif xy[0] <= 610 and xy[1] <= 420:
         if arr[1][1] == "":
             arr[1][1] = chars[turn]
             turn = (turn + 1)%2
             print(f"----- TURNO GIOCATORE {turn} -----")
             print_game(arr)
 
-    elif xy[0] > 583 and xy[1] <= 347:
+    elif xy[0] > 610 and xy[1] <= 420:
         if arr[1][2] == "":
             arr[1][2] = chars[turn]
             turn = (turn + 1)%2
             print(f"----- TURNO GIOCATORE {turn} -----")
             print_game(arr)
 
-    elif xy[0] <= 373 and xy[1] > 347:
+    elif xy[0] <= 391 and xy[1] > 420:
         if arr[2][0] == "":
             arr[2][0] = chars[turn]
             turn = (turn + 1)%2
             print(f"----- TURNO GIOCATORE {turn} -----")
             print_game(arr)
 
-    elif xy[0] <= 583 and xy[1] > 347:
+    elif xy[0] <= 610 and xy[1] > 420:
         if arr[2][1] == "":
             arr[2][1] = chars[turn]
             turn = (turn + 1)%2

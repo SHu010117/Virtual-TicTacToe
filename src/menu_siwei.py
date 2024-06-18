@@ -63,60 +63,55 @@ mp_draw = mp.solutions.drawing_utils
 draws = [[]]
 drawNumber = -1
 drawStart = False
-intercection_points = [(373,182),(583,182),(373,347),(583,347)]
+intercection_points = [(391,220),(610,220),(391,420),(610,420)]
 chars = ["O", "X"]
 turn = 0
 grid_array = [["","",""],["","",""],["","",""]]
 ratio_x_to_pixel = lambda x: math.ceil(x * WIDTH)
 ratio_y_to_pixel = lambda y: math.ceil(y * HEIGHT)
+startCell = None
 
-def check_cell(arr, xy, chars):
+def insert_move(grid, cell_index, chars):
     global turn
-    if xy[0] <= 373 and xy[1] <= 182:
-        if arr[0][0] == "":
-            arr[0][0] = chars[turn]
-            turn = (turn + 1)%2
-            print(arr)
-    elif xy[0] <= 583 and xy[1] <= 182:
-        if arr[0][1] == "":
-            arr[0][1] = chars[turn]
-            turn = (turn + 1)%2
-            print(arr)
-    elif xy[0] > 583 and xy[1] <= 182:
-        if arr[0][2] == "":
-            arr[0][2] = chars[turn]
-            turn = (turn + 1)%2
-            print(arr)
-    elif xy[0] <= 373 and xy[1] <= 347:
-        if arr[1][0] == "":
-            arr[1][0] = chars[turn]
-            turn = (turn + 1)%2
-            print(arr)
-    elif xy[0] <= 583 and xy[1] <= 347:
-        if arr[1][1] == "":
-            arr[1][1] = chars[turn]
-            turn = (turn + 1)%2
-            print(arr)
-    elif xy[0] > 583 and xy[1] <= 347:
-        if arr[1][2] == "":
-            arr[1][2] = chars[turn]
-            turn = (turn + 1)%2
-            print(arr)
-    elif xy[0] <= 373 and xy[1] > 347:
-        if arr[2][0] == "":
-            arr[2][0] = chars[turn]
-            turn = (turn + 1)%2
-            print(arr)
-    elif xy[0] <= 583 and xy[1] > 347:
-        if arr[2][1] == "":
-            arr[2][1] = chars[turn]
-            turn = (turn + 1)%2
-            print(arr)
+    if startCell == None:
+        return
+    i = cell_index//3
+    j = cell_index%3
+    if grid[i][j] == "":
+        grid[i][j] = chars[turn]
+        turn = (turn + 1) % 2 
+        print(grid)
+
+x_coordinates = [192, 391, 610, 784]
+y_coordinates = [53, 220, 420, 640]
+def get_boundaries(index, xs, ys):
+    i = index // 3
+    j = index % 3
+    return [xs[j], xs[j+1], ys[i], ys[i+1]]
+
+def get_cell(xy):
+    global turn
+    if xy[0] <= 391 and xy[1] <= 220:
+        return 0
+    elif xy[0] <= 610 and xy[1] <= 220:
+        return 1
+    elif xy[0] > 610 and xy[1] <= 220:
+        return 2
+    elif xy[0] <= 391 and xy[1] <= 420:
+        return 3
+    elif xy[0] <= 610 and xy[1] <= 420:
+        return 4
+    elif xy[0] > 610 and xy[1] <= 420:
+        return 5
+    elif xy[0] <= 391 and xy[1] > 420:
+        return 6
+    elif xy[0] <= 610 and xy[1] > 420:
+        return 7
     else:
-        if arr[2][2] == "":
-            arr[2][2] = chars[turn]
-            turn = (turn + 1)%2
-            print(arr)
+        return 8
+
+def limit_drawing_into_cell():
+    pass
 
 
 def check_winner(grid):
@@ -137,7 +132,7 @@ def check_winner(grid):
         print(grid[0][2] + " won")
         
 
-def draw_game(indexpos, draw, arr, chars):
+def draw_game(indexpos, draw, grid, chars, index_cell):
     if draw:
         pygame.draw.circle(WIN, (0, 255, 0), indexpos, 7)
     elif indexpos:
@@ -147,7 +142,7 @@ def draw_game(indexpos, draw, arr, chars):
         for j in range(len(draws[i])):
             if j != 0:
                 pygame.draw.line(WIN, (255, 0, 255), draws[i][j-1], draws[i][j], 7)
-                check_cell(arr, draws[i][j-1], chars)
+                insert_move(grid, index_cell, chars)
                             
     pygame.display.flip()
 
@@ -260,23 +255,26 @@ while running:
                 ratio_y_to_pixel = lambda y: math.ceil(y * HEIGHT)
                 index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
 
+                '''
                 # In questo modo posso spostare il pallino verso il basso senza che scompaia o faccia cose strane. (Da sistemare)
                 cx = np.interp(int(ratio_x_to_pixel(index_tip.x)), [150, WIDTH - 150], [0, WIDTH])
                 cy = np.interp(int(ratio_y_to_pixel(index_tip.y)), [150, HEIGHT - 150], [0, HEIGHT])
+                '''
+                indexpos = (ratio_x_to_pixel(index_tip.x), ratio_y_to_pixel(index_tip.y))
 
-                indexpos = (cx, cy)
-
-
-
-            if fingers[1] and not fingers[2]:
+            if fingers[1] and not fingers[2] and not menu:
                 if not drawStart:
                     drawStart = True
+                    startCell = get_cell(indexpos)
                     drawNumber += 1
                     draws.append([])
+                boundaries = get_boundaries(startCell, x_coordinates, y_coordinates)
+                indexpos = min(max(indexpos[0], boundaries[0]), boundaries[1]), min(max(indexpos[1], boundaries[2]), boundaries[3])
                 draws[drawNumber].append(indexpos)
                 draw = True
             else:
                 drawStart = False
+                # draw = False
 
 
 
@@ -297,7 +295,7 @@ while running:
 
     else:
         WIN.blit(grid_image, (0, 0))
-        draw_game(indexpos, draw, grid_array, chars)
+        draw_game(indexpos, draw, grid_array, chars, startCell)
         check_winner(grid_array)
 
         #pygame.display.flip()
