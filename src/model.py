@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader, Subset
 from torchvision.datasets import ImageFolder
 from torchvision.transforms import ToTensor
 
-batch_size = 32
+batch_size = 64
 
 transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=1),
@@ -18,54 +18,15 @@ transform = transforms.Compose([
 ])
 
 # load the training and the test datasets
-train_data = torchvision.datasets.EMNIST(root='../data', split='letters', train=True, download=True,
+train_data = torchvision.datasets.EMNIST(root='./data', split='byclass', train=True, download=True,
                                          transform=transform)
-test_data = torchvision.datasets.EMNIST(root='../data', split='letters', train=False, download=True,
+test_data = torchvision.datasets.EMNIST(root='./data', split='byclass', train=False, download=True,
                                         transform=transform)
-
-
-class_labels = {'X': 24, 'O': 15}
-
-
-def filter_dataset(dataset, labels):
-    indices = [i for i, (_, label) in enumerate(dataset) if label in labels.values()]
-    return Subset(dataset, indices)
-
-
-def new_labels(dataset):
-    for i in range(len(dataset)):
-        _, label = dataset[i]
-        if label == 15:
-            dataset.dataset.targets[dataset.indices[i]] = 0
-        elif label == 24:
-            dataset.dataset.targets[dataset.indices[i]] = 1
-
-
-train_data = filter_dataset(train_data, class_labels)
-test_data = filter_dataset(test_data, class_labels)
-
-new_labels(train_data)
-new_labels(test_data)
-
-'''
-def show_images(dataset, num_images=6):
-    figure = plt.figure(figsize=(10, 5))
-    cols, rows = 3, 2
-    for i in range(1, cols * rows + 1):
-        sample_idx = torch.randint(len(dataset), size=(1,)).item()
-        img, label = dataset[sample_idx]
-        figure.add_subplot(rows, cols, i)
-        plt.title('X' if label == 1 else 'O')
-        plt.axis("off")
-        plt.imshow(img.squeeze(), cmap="gray")
-    plt.show()
-
-# Visualizzare 6 immagini dal subset
-show_images(train_data, num_images=6)
-'''
-
 train_dataloader = DataLoader(train_data, batch_size=batch_size)
 test_dataloader = DataLoader(test_data, batch_size=batch_size)
+
+
+
 
 # get the best device for computation
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
@@ -76,18 +37,20 @@ class OurCNN(nn.Module):
     def __init__(self):
         super(OurCNN, self).__init__()
         self.cnn = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=3, padding=1),
+            nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
         )
 
         self.mlp = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(12544, 128),
+            nn.Linear(12544, 800),
             nn.ReLU(),
-            nn.Linear(128, 2)
+            nn.Linear(800, 120),
+            nn.ReLU(),
+            nn.Linear(120, 62)
         )
 
     def forward(self, x):
@@ -109,7 +72,7 @@ loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
 # define the accuracy metric
-metric = torchmetrics.Accuracy(task='multiclass', num_classes=2).to(device)
+metric = torchmetrics.Accuracy(task='multiclass', num_classes=62).to(device)
 
 
 # defining the training loop
@@ -133,7 +96,7 @@ def train_loop(dataloader, model, loss_fn, optimizer):
         optimizer.zero_grad()
 
         # print some informations
-        if batch % 100 == 0:
+        if batch % 1000 == 0:
             loss_v, current_batch = loss.item(), (batch + 1) * len(X)
             print(f'loss: {loss_v} [{current_batch}/{size}]')
             acc = metric(pred, y)
@@ -178,4 +141,3 @@ for epoch in range(epochs):
     print("Testing...")
     test_loop(test_dataloader, model)
 
-print("Done!")

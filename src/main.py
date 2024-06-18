@@ -14,7 +14,8 @@ NINTENDOPATH = '../assets/fonts/ro-spritendo-font/RoSpritendoSemiboldBeta-vmVwZ.
 # Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-
+DARK_GREEN = (24, 60, 37)
+DARK_GREEN2 = (24, 60, 37)
 
 # Error constant
 EPSILON = 0
