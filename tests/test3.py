@@ -40,8 +40,8 @@ model = OurCNN().to(device)
 
 
 
-image_path = "./Otest.png"
-model.load_state_dict(torch.load('../models/X_O_CNN.pth',  map_location=torch.device('cpu')))
+image_path = "C:/Users/Siwei Hu/Desktop/AI-Lab/Virtual-TicTacToe/tests/Otest.png"
+model.load_state_dict(torch.load("C:/Users/Siwei Hu/Desktop/AI-Lab/Virtual-TicTacToe/models/X_O_CNN.pth",  map_location=torch.device('cpu')))
 model.eval()
 
 transform = transforms.Compose([
