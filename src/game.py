@@ -23,15 +23,12 @@ ICONPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'two_fing
 move_icon = pygame.image.load(ICONPATH)
 move_icon = pygame.transform.scale(move_icon, (50, 50))
 
+THUMBUP = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'thumbs-up.png')
+confirm_icon = pygame.image.load(THUMBUP)
+confirm_icon = pygame.transform.scale(confirm_icon, (90, 90))
+confirm_icon = pygame.transform.flip(confirm_icon, True, False)
 
-def insert_move(grid, cell_index, chars):
-    global turn
-    i = cell_index//3
-    j = cell_index%3
-    if grid[i][j] == "":
-        grid[i][j] = chars[turn]
-        turn = (turn + 1) % 2 
-        print(grid)
+
 
 def check_winner(grid):
     # Check rows
@@ -51,8 +48,8 @@ def check_winner(grid):
         print(grid[0][2] + " won")
 
 
-#def draw_game(win, index_pos, draw, arr, chars, draws):
-def draw_game(win, index_pos, draw, grid, chars, index_cell, draws):
+#def draw_game(win, index_pos, draw, arr, chars, draws, count):
+def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob):
     # Immagine mignolo
     win.blit(pinky_up_img, (10, 10))
     # testo vicino
@@ -71,9 +68,14 @@ def draw_game(win, index_pos, draw, grid, chars, index_cell, draws):
     if draw:
         pygame.draw.circle(win, (0, 255, 0), index_pos, 7)
         # print(index_pos)
-
     elif index_pos:
         pygame.draw.circle(win, (255, 0, 0), index_pos, 7)
+        # print(index_pos)
+
+    if count > 0:
+        win.blit(confirm_icon, (865, 307))
+        text = font.render('CONFIRM', True, WHITE)
+        win.blit(text, (860, 404))
 
     for i in range(len(draws)):
         for j in range(len(draws[i])):

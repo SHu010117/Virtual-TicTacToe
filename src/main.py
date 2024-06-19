@@ -70,13 +70,18 @@ chars = ["O", "X"]
 turn = 0
 
 
-def insert_move(grid, cell_index, chars):
+def insert_move(grid, cell_index, chars, x_prob, o_prob):
     global turn
     i = cell_index // 3
     j = cell_index % 3
     if grid[i][j] == "":
-        grid[i][j] = chars[turn]
-        turn = (turn + 1) % 2
+        if turn == 0:
+            if x_prob > o_prob:
+                turn = 1
+        grid[i][j] = chars[(turn % 2)]
+        turn += 1
+
+    print(grid)
 
 
 def fingers_up(hand_landmarks):
@@ -164,19 +169,16 @@ def isOccupied(grid, index_pos):
     else:
         return True
 
-
 menu = True
 running = True
 show_text = True
 last_toggle_time = pygame.time.get_ticks()
-
-tmp = False
-tmpc = 1
-
+check_cell = False
 Erasing = False
 boundaries = None
-
 count = 0
+
+
 
 # Main loop
 while running:
@@ -201,14 +203,6 @@ while running:
         for hand_landmarks in res.multi_hand_landmarks:
             fingers = fingers_up(hand_landmarks)
 
-            # Check if the draw is confirmed
-            if is_thumb_up_and_fist_closed(hand_landmarks):
-                menu = False
-                if startCell is not None:
-                    tmp = True
-                    count = 0
-                    insert_move(grid_array, startCell, chars)
-
             # Controllo se l'indice è alzato e prendo la posizione.
             if fingers[1]:
                 ratio_x_to_pixel = lambda x: math.ceil(x * WIDTH)
@@ -222,6 +216,14 @@ while running:
                 if boundaries is not None and count > 0:
                     index_pos = min(max(index_pos[0], boundaries[0]), boundaries[1]), min(
                         max(index_pos[1], boundaries[2]), boundaries[3])
+
+            # Check if the draw is confirmed
+            if is_thumb_up_and_fist_closed(hand_landmarks):
+                menu = False
+                if count > 0:
+                    check_cell = True
+                    count = 0
+
 
             if fingers == [False, True, False, False, False] and not menu:
                 if not isOccupied(grid_array, index_pos):
@@ -259,13 +261,12 @@ while running:
         draw_menu(WIN, show_text, WIDTH, HEIGHT)
 
     else:
-        WIN.blit(grid_img, (0, 0))
-        draw_game(WIN, index_pos, draw, grid_array, chars, startCell, draws)
-        check_winner(grid_array)
+
 
         # ------------------------- Prova -------------------------
-
-        if tmp and tmpc == 1:
+        x_prob = None
+        o_prob = None
+        if check_cell:
             device = ('cuda' if torch.cuda.is_available() else 'cpu')
             #x, y, width, height = 192, 53, 199, 167
             boundaries = get_boundaries(startCell, x_coordinates, y_coordinates)
@@ -300,9 +301,17 @@ while running:
 
             letters = [chr(i + 96) for i in range(1, 27)]
             probabilities_dict = {letters[i - 1]: probabilities[i] for i in range(1, 27)}
+
+            x_prob = round(probabilities_dict[letters[23]].item(), 2)
+            o_prob = round(probabilities_dict[letters[14]].item(), 2)
+
             print("\nProbabilità per ogni lettera:")
             print(f'{letters[23]} : {probabilities_dict[letters[23]].item():.2f}')
             print(f'{letters[14]} : {probabilities_dict[letters[14]].item():.2f}')
 
-            tmpc = 2
-            tmp = False
+            insert_move(grid_array, startCell, chars, x_prob, o_prob)
+            check_cell = False
+
+        WIN.blit(grid_img, (0, 0))
+        draw_game(WIN, index_pos, draw, draws, count, turn, x_prob, o_prob)
+        check_winner(grid_array)
