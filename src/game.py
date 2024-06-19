@@ -123,7 +123,7 @@ def draw_game(win, index_pos, draw, arr, chars, draws):
 
     if draw:
         pygame.draw.circle(win, (0, 255, 0), index_pos, 7)
-        print(index_pos)
+        # print(index_pos)
 
     elif index_pos:
         pygame.draw.circle(win, (255, 0, 0), index_pos, 7)

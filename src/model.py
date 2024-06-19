@@ -8,7 +8,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Subset
 from torchvision.datasets import ImageFolder
 from torchvision.transforms import ToTensor
-
+'''
 batch_size = 64
 
 transform = transforms.Compose([
@@ -31,7 +31,7 @@ test_dataloader = DataLoader(test_data, batch_size=batch_size)
 # get the best device for computation
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
-
+'''
 # Passo 3: Definire la struttura della CNN
 class OurCNN(nn.Module):
     def __init__(self):
@@ -46,11 +46,12 @@ class OurCNN(nn.Module):
 
         self.mlp = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(12544, 800),
+            nn.Linear(12544, 512),
             nn.ReLU(),
-            nn.Linear(800, 120),
+            nn.Linear(512, 128),
             nn.ReLU(),
-            nn.Linear(120, 62)
+            nn.Linear(128,27)
+
         )
 
     def forward(self, x):
@@ -58,6 +59,7 @@ class OurCNN(nn.Module):
         x = self.mlp(x)
         return x
 
+'''
 
 model = OurCNN().to(device)
 
@@ -141,3 +143,4 @@ for epoch in range(epochs):
     print("Testing...")
     test_loop(test_dataloader, model)
 
+'''

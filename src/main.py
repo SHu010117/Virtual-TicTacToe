@@ -3,9 +3,16 @@ import cv2
 import mediapipe as mp
 import pygame
 import numpy as np
+import torch
+import torchvision.transforms as transforms
+
+
 from menu import draw_menu
 from game import draw_game
 from game import check_winner
+from PIL import Image
+from model import OurCNN
+
 
 SUPERFTIMEPATH = '../assets/fonts/super-funtime-font/SuperFuntime-3zpLX.ttf'
 THEGLOBEFONTPATH = '../assets/fonts/the-globe-font/TheGlobePersonalUseBold-2ORlw.ttf'
@@ -107,6 +114,9 @@ running = True
 show_text = True
 last_toggle_time = pygame.time.get_ticks()
 
+tmp = False
+tmpc = 1
+
 # Main loop
 while running:
     current_time = pygame.time.get_ticks()
@@ -134,7 +144,8 @@ while running:
 
             # Controllo se l'indice è alzato e prendo la posizione.
             fingers = fingers_up(hand_landmarks)
-
+            if fingers[4] and fingers[1] and not fingers[3] and not fingers[2]:
+                tmp = True
             if fingers[1]:
                 ratio_x_to_pixel = lambda x: math.ceil(x * WIDTH)
                 ratio_y_to_pixel = lambda y: math.ceil(y * HEIGHT)
@@ -166,3 +177,45 @@ while running:
         WIN.blit(grid_img, (0, 0))
         draw_game(WIN, index_pos, draw, grid_array, chars, draws)
         check_winner(grid_array)
+
+        # ------------------------- Prova -------------------------
+        if tmp and tmpc == 1:
+            device = ('cuda' if torch.cuda.is_available() else 'cpu')
+            x, y, width, height = 192, 75, 186, 136
+            subsurface = WIN.subsurface((x, y, width, height))
+            subsurface_array = pygame.surfarray.array3d(subsurface)
+            subsurface_array = np.transpose(subsurface_array, (1, 0, 2))
+            cropped_image = Image.fromarray(subsurface_array)
+            model = OurCNN().to(device)
+            model.load_state_dict(torch.load('../models/OurCNN2.pth', map_location=torch.device('cpu')))
+            model.eval()
+            transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=1),
+                transforms.Resize((28, 28)),  # Assicurati che l'immagine sia 28x28
+                transforms.ToTensor(),
+                transforms.Normalize((0.5,), (0.5,))
+            ])
+            image = transform(cropped_image).unsqueeze(0)
+
+            image = image.to(device)
+
+
+
+
+            with torch.no_grad():  # Disabilita il calcolo dei gradienti
+                output = model(image)
+                probabilities = torch.nn.functional.softmax(output, dim=1)
+                top_prob, top_class = probabilities.topk(1, dim=1)
+                probabilities = probabilities.squeeze().cpu().numpy()
+                prediction = top_class.item()
+
+            letters = [chr(i + 96) for i in range(1, 27)]
+            probabilities_dict = {letters[i - 1]: probabilities[i] for i in range(1, 27)}
+            print("\nProbabilità per ogni lettera:")
+            for letter, prob in probabilities_dict.items():
+                print(f'{letter}: {prob:.4f}')
+
+            tmpc = 2
+            tmp = False
+
+
