@@ -1,3 +1,33 @@
+import pygame
+import os
+
+parent_dir = "C:/Users/Siwei Hu/Desktop/AILab/Virtual-TicTacToe"
+PIXELPATH = parent_dir + '/assets/fonts/public-pixel-font/PublicPixel-E447g.ttf'
+if not os.path.exists(PIXELPATH):
+    print(f"Background image not found at path: {PIXELPATH}")
+    pygame.quit()
+    exit()
+DARK_GREEN = (24, 60, 37)
+DARK_GREEN2 = (24, 60, 37)
+
+
+def draw_menu(win, show_text, width, height):
+    # WIN.fill((245,255,255))
+
+    # Scritta principale
+    font = pygame.font.Font(PIXELPATH, 78)
+    text = font.render('TIC-TAC-TOE', True, DARK_GREEN)
+    win.blit(text, (width // 2 - text.get_width() // 2, (height // 8)))
+
+    # Scritta secondaria
+    if show_text:
+        font = pygame.font.Font(PIXELPATH, 24)
+        text = font.render('Pollice in sù per iniziare', True, DARK_GREEN2)
+        win.blit(text, (width // 2 - text.get_width() // 2, (height // 4) + 65))
+
+    # Aggiorna l'intera schermata
+    pygame.display.flip()
+'''
 import cv2
 import mediapipe as mp
 import pygame
@@ -292,17 +322,7 @@ while running:
 
 
     if menu:
-        '''
-        ret, video_frame = video_capture.read()
-        if not ret:
-            # Se il video è terminato, ricomincia dall'inizio
-            video_capture.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            ret, video_frame = video_capture.read()
-        video_frame_rgb = cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
-        video_frame_pygame = pygame.image.frombuffer(video_frame_rgb.tobytes(), video_frame_rgb.shape[1::-1], 'RGB')
-        video_frame_pygame = pygame.transform.scale(video_frame_pygame, (WIDTH, HEIGHT))
-        WIN.blit(video_frame_pygame, (0, 0))
-        '''
+        
         WIN.blit(background_image, (0, 0))
         draw_menu(show_text, indexpos)
 
@@ -312,3 +332,4 @@ while running:
         check_winner(grid_array)
 
         #pygame.display.flip()
+'''

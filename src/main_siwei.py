@@ -8,12 +8,13 @@ import torchvision.transforms as transforms
 import os
 
 
-from menu import draw_menu
-from game import draw_game
-from game import check_winner
+from menu_siwei import draw_menu
+from game_siwei import draw_game
+from game_siwei import check_winner
 from PIL import Image
 from model import OurCNN
 
+print("ok")
 BASEDIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(BASEDIR)
 
@@ -279,3 +280,7 @@ while running:
             tmpc = 2
             tmp = False
             
+
+
+
+
