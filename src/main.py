@@ -7,7 +7,6 @@ import torch
 import torchvision.transforms as transforms
 import os
 
-
 from menu import draw_menu
 from game import draw_game
 from game import check_winner
@@ -48,7 +47,6 @@ grid_img = pygame.image.load(grid_image_path)
 grid_img = pygame.transform.scale(grid_img, (WIDTH, HEIGHT))
 MODELPATH = os.path.join(PARENT_DIR, 'models', 'OurCNN2.pth')
 
-
 FPS = 60
 CLOCK = pygame.time.Clock()
 
@@ -68,6 +66,17 @@ startCell = None
 
 grid_array = [["", "", ""], ["", "", ""], ["", "", ""]]
 chars = ["O", "X"]
+
+turn = 0
+
+
+def insert_move(grid, cell_index, chars):
+    global turn
+    i = cell_index // 3
+    j = cell_index % 3
+    if grid[i][j] == "":
+        grid[i][j] = chars[turn]
+        turn = (turn + 1) % 2
 
 
 def fingers_up(hand_landmarks):
@@ -113,26 +122,30 @@ def is_thumb_up_and_fist_closed(hand_landmarks):
 
     return is_thumb_up and is_fist_closed
 
+
 x_coordinates = [192, 391, 610, 784]
 y_coordinates = [53, 220, 420, 640]
+
+
 def get_boundaries(index, xs, ys):
     i = index // 3
     j = index % 3
-    return [xs[j], xs[j+1], ys[i], ys[i+1]]
+    return [xs[j], xs[j + 1], ys[i], ys[i + 1]]
+
 
 def get_cell(xy):
     global turn
     if xy[0] <= 391 and xy[1] <= 220:
         return 0
-    elif xy[0] <= 610 and xy[1] <= 220:
+    elif xy[0] <= 610 and xy[1] <= 220 and xy[0] > 391:
         return 1
     elif xy[0] > 610 and xy[1] <= 220:
         return 2
-    elif xy[0] <= 391 and xy[1] <= 420:
+    elif xy[0] <= 391 and xy[1] <= 420 and xy[1] > 220:
         return 3
-    elif xy[0] <= 610 and xy[1] <= 420:
+    elif xy[0] <= 610 and xy[1] <= 420 and xy[0] > 391 and xy[1] > 220:
         return 4
-    elif xy[0] > 610 and xy[1] <= 420:
+    elif xy[0] > 610 and xy[1] <= 420 and xy[1] > 220:
         return 5
     elif xy[0] <= 391 and xy[1] > 420:
         return 6
@@ -140,7 +153,18 @@ def get_cell(xy):
         return 7
     else:
         return 8
-    
+
+
+def isOccupied(grid, index_pos):
+    startCell = get_cell(index_pos)
+    i = startCell // 3
+    j = startCell % 3
+    if grid[i][j] == "":
+        return False
+    else:
+        return True
+
+
 menu = True
 running = True
 show_text = True
@@ -150,7 +174,9 @@ tmp = False
 tmpc = 1
 
 Erasing = False
+boundaries = None
 
+count = 0
 
 # Main loop
 while running:
@@ -173,14 +199,17 @@ while running:
     draw = False
     if res.multi_hand_landmarks:
         for hand_landmarks in res.multi_hand_landmarks:
-            # Controllo se il pollice è alzato e il pugno chiuso
+            fingers = fingers_up(hand_landmarks)
+
+            # Check if the draw is confirmed
             if is_thumb_up_and_fist_closed(hand_landmarks):
                 menu = False
+                if startCell is not None:
+                    tmp = True
+                    count = 0
+                    insert_move(grid_array, startCell, chars)
 
             # Controllo se l'indice è alzato e prendo la posizione.
-            fingers = fingers_up(hand_landmarks)
-            if fingers == [False, False, False, False, True]:
-                tmp = True
             if fingers[1]:
                 ratio_x_to_pixel = lambda x: math.ceil(x * WIDTH)
                 ratio_y_to_pixel = lambda y: math.ceil(y * HEIGHT)
@@ -190,29 +219,35 @@ while running:
                 cx = float(np.interp(int(ratio_x_to_pixel(index_tip.x)), [150, WIDTH - 150], [0, WIDTH]))
                 cy = float(np.interp(int(ratio_y_to_pixel(index_tip.y)), [150, HEIGHT - 150], [0, HEIGHT]))
                 index_pos = (cx, cy)
+                if boundaries is not None and count > 0:
+                    index_pos = min(max(index_pos[0], boundaries[0]), boundaries[1]), min(
+                        max(index_pos[1], boundaries[2]), boundaries[3])
 
-            if fingers[1] and not fingers[2] and not menu:
-                if not drawStart:
-                    startCell = get_cell(index_pos)
-                    drawStart = True
-                    drawNumber += 1
-                    draws.append([])
-                boundaries = get_boundaries(startCell, x_coordinates, y_coordinates)
-                index_pos = min(max(index_pos[0], boundaries[0]), boundaries[1]), min(max(index_pos[1], boundaries[2]), boundaries[3])
-                draws[drawNumber].append(index_pos)
-                draw = True
+            if fingers == [False, True, False, False, False] and not menu:
+                if not isOccupied(grid_array, index_pos):
+                    if not drawStart:
+                        startCell = get_cell(index_pos)
+                        drawStart = True
+                        drawNumber += 1
+                        draws.append([])
+                        count += 1
+                    boundaries = get_boundaries(startCell, x_coordinates, y_coordinates)
+                    index_pos = min(max(index_pos[0], boundaries[0]), boundaries[1]), min(
+                        max(index_pos[1], boundaries[2]), boundaries[3])
+                    draws[drawNumber].append(index_pos)
+                    draw = True
             else:
                 drawStart = False
 
             if fingers == [False, True, True, True, False]:
-                # print("ok")
-                if draws: 
+                if draws:
                     if drawNumber >= 0:
-                        print(drawNumber)
                         if not Erasing:
                             draws.pop()
                             drawNumber -= 1
                             Erasing = True
+                            count -= 1
+
             else:
                 Erasing = False
 
@@ -227,8 +262,6 @@ while running:
         WIN.blit(grid_img, (0, 0))
         draw_game(WIN, index_pos, draw, grid_array, chars, startCell, draws)
         check_winner(grid_array)
-
-
 
         # ------------------------- Prova -------------------------
 
@@ -258,9 +291,6 @@ while running:
 
             image = image.to(device)
 
-
-
-
             with torch.no_grad():  # Disabilita il calcolo dei gradienti
                 output = model(image)
                 probabilities = torch.nn.functional.softmax(output, dim=1)
@@ -274,8 +304,5 @@ while running:
             print(f'{letters[23]} : {probabilities_dict[letters[23]].item():.2f}')
             print(f'{letters[14]} : {probabilities_dict[letters[14]].item():.2f}')
 
-
-
             tmpc = 2
             tmp = False
-            
