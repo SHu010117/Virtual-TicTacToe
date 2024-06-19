@@ -5,7 +5,7 @@ import pygame
 import numpy as np
 import torch
 import torchvision.transforms as transforms
-
+import os
 
 from menu import draw_menu
 from game import draw_game
@@ -13,10 +13,6 @@ from game import check_winner
 from PIL import Image
 from model import OurCNN
 
-
-SUPERFTIMEPATH = '../assets/fonts/super-funtime-font/SuperFuntime-3zpLX.ttf'
-THEGLOBEFONTPATH = '../assets/fonts/the-globe-font/TheGlobePersonalUseBold-2ORlw.ttf'
-NINTENDOPATH = '../assets/fonts/ro-spritendo-font/RoSpritendoSemiboldBeta-vmVwZ.otf'
 
 # Colors
 BLACK = (0, 0, 0)
@@ -226,7 +222,7 @@ while running:
 
 
         # ------------------------- Prova -------------------------
-
+        '''
         if tmp and tmpc == 1:
             device = ('cuda' if torch.cuda.is_available() else 'cpu')
             #x, y, width, height = 192, 53, 199, 167
@@ -273,7 +269,7 @@ while running:
 
             tmpc = 2
             tmp = False
-            
+            '''
 
 
 
