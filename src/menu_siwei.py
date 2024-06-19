@@ -63,6 +63,7 @@ mp_draw = mp.solutions.drawing_utils
 draws = [[]]
 drawNumber = -1
 drawStart = False
+Erasing = False
 intercection_points = [(391,220),(610,220),(391,420),(610,420)]
 chars = ["O", "X"]
 turn = 0
@@ -275,7 +276,19 @@ while running:
             else:
                 drawStart = False
                 # draw = False
-
+            
+            '''
+            if fingers == [False, False, False, False, True] and not Erasing:
+                # print("ok")
+                if draws: 
+                    if drawNumber >= 0:
+                        print("ok")
+                        draws.pop()
+                        drawNumber -= 1
+                        Erasing = True
+            else:
+                Erasing = False
+            '''
 
 
     if menu:
