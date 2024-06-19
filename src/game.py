@@ -15,13 +15,12 @@ draw_icon = pygame.transform.rotate(draw_icon, 90)
 PIXELPATH = '../assets/fonts/public-pixel-font/PublicPixel-E447g.ttf'
 WHITE = (255, 255, 255)
 
+move_icon = pygame.image.load('../assets/images/game images/two_fing.png')
+move_icon = pygame.transform.scale(move_icon, (50, 50))
 
-startCell = None
 
 def insert_move(grid, cell_index, chars):
     global turn
-    if startCell == None:
-        return
     i = cell_index//3
     j = cell_index%3
     if grid[i][j] == "":
