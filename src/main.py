@@ -145,6 +145,8 @@ last_toggle_time = pygame.time.get_ticks()
 tmp = False
 tmpc = 1
 
+Erasing = False
+
 # Main loop
 while running:
     current_time = pygame.time.get_ticks()
@@ -172,7 +174,7 @@ while running:
 
             # Controllo se l'indice è alzato e prendo la posizione.
             fingers = fingers_up(hand_landmarks)
-            if fingers[4] and fingers[1] and not fingers[3] and not fingers[2]:
+            if fingers == [False, False, False, False, True]:
                 tmp = True
             if fingers[1]:
                 ratio_x_to_pixel = lambda x: math.ceil(x * WIDTH)
@@ -191,7 +193,7 @@ while running:
                     drawNumber += 1
                     draws.append([])
                 boundaries = get_boundaries(startCell, x_coordinates, y_coordinates)
-                indexpos = min(max(indexpos[0], boundaries[0]), boundaries[1]), min(max(indexpos[1], boundaries[2]), boundaries[3])
+                index_pos = min(max(index_pos[0], boundaries[0]), boundaries[1]), min(max(index_pos[1], boundaries[2]), boundaries[3])
                 draws[drawNumber].append(index_pos)
                 draw = True
             else:
@@ -221,14 +223,23 @@ while running:
         draw_game(WIN, index_pos, draw, grid_array, chars, startCell, draws)
         check_winner(grid_array)
 
+
+
         # ------------------------- Prova -------------------------
+
         if tmp and tmpc == 1:
             device = ('cuda' if torch.cuda.is_available() else 'cpu')
-            x, y, width, height = 192, 75, 186, 136
+            #x, y, width, height = 192, 53, 199, 167
+            boundaries = get_boundaries(startCell, x_coordinates, y_coordinates)
+            x, y = boundaries[0], boundaries[2]
+            width, height = boundaries[1] - boundaries[0], boundaries[3] - boundaries[2]
+
             subsurface = WIN.subsurface((x, y, width, height))
             subsurface_array = pygame.surfarray.array3d(subsurface)
             subsurface_array = np.transpose(subsurface_array, (1, 0, 2))
             cropped_image = Image.fromarray(subsurface_array)
+
+            print(startCell)
             model = OurCNN().to(device)
             model.load_state_dict(torch.load('../models/OurCNN2.pth', map_location=torch.device('cpu')))
             model.eval()
@@ -255,10 +266,15 @@ while running:
             letters = [chr(i + 96) for i in range(1, 27)]
             probabilities_dict = {letters[i - 1]: probabilities[i] for i in range(1, 27)}
             print("\nProbabilità per ogni lettera:")
-            for letter, prob in probabilities_dict.items():
-                print(f'{letter}: {prob:.4f}')
+            print(f'{letters[23]} : {probabilities_dict[letters[23]].item():.2f}')
+            print(f'{letters[14]} : {probabilities_dict[letters[14]].item():.2f}')
+
+
 
             tmpc = 2
             tmp = False
+            
+
+
 
 

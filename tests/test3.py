@@ -40,7 +40,7 @@ class OurCNN(nn.Module):
 
 model = OurCNN().to(device)
 
-image_path = "./test_img/Screenshot 2024-06-19 alle 14.01.47.png"
+image_path = "./test_img/Screenshot 2024-06-19 alle 16.29.43.png"
 model.load_state_dict(torch.load('../models/OurCNN2.pth', map_location=torch.device('cpu')))
 model.eval()
 
