@@ -6,8 +6,8 @@ BASEDIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(BASEDIR)
 intersection_points = [(373, 182), (583, 182), (373, 347), (583, 347)]
 turn = 0
-PINKYUP = "C:/Users/Siwei Hu/Desktop/AI-Lab/Virtual-TicTacToe/assets/images/game images/pinky_up.png"
-pinky_up_img = pygame.image.load(PINKYUP)
+PINKYUPPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'pinky_up.png')
+pinky_up_img = pygame.image.load(PINKYUPPATH)
 pinky_up_img = pygame.transform.scale(pinky_up_img, (50, 50))
 
 DRAWPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'pointing-right_237663.png')
@@ -19,7 +19,7 @@ draw_icon = pygame.transform.rotate(draw_icon, 90)
 PIXELPATH = os.path.join(PARENT_DIR, 'assets', 'fonts', 'public-pixel-font', 'PublicPixel-E447g.ttf')
 WHITE = (255, 255, 255)
 
-ICONPATH = "C:/Users/Siwei Hu/Desktop/AI-Lab/Virtual-TicTacToe/assets/images/game images/two_fing.png"
+ICONPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'two_fing.png')
 move_icon = pygame.image.load(ICONPATH)
 move_icon = pygame.transform.scale(move_icon, (50, 50))
 
