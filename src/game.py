@@ -11,8 +11,6 @@ draw_icon = pygame.image.load('../assets/images/game images/pointing-right_23766
 draw_icon = pygame.transform.scale(draw_icon, (55, 55))
 draw_icon = pygame.transform.rotate(draw_icon, 90)
 
-move_icon = pygame.image.load('../assets/images/game images/two_fing.png')
-move_icon = pygame.transform.scale(move_icon, (50, 50))
 
 PIXELPATH = '../assets/fonts/public-pixel-font/PublicPixel-E447g.ttf'
 WHITE = (255, 255, 255)
