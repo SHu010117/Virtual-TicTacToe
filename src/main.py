@@ -51,7 +51,7 @@ mp_draw = mp.solutions.drawing_utils
 
 # Inizializzazione dei 'disegni'
 draws = [[]]
-drawNumber = -1
+drawNumber = 0
 drawStart = False
 startCell = None
 
@@ -185,6 +185,18 @@ while running:
                 draw = True
             else:
                 drawStart = False
+
+            if fingers == [False, True, True, True, False]:
+                # print("ok")
+                if draws: 
+                    if drawNumber >= 0:
+                        print(drawNumber)
+                        if not Erasing:
+                            draws.pop()
+                            drawNumber -= 1
+                            Erasing = True
+            else:
+                Erasing = False
 
     if menu:
         WIN.blit(background_image, (0, 0))
