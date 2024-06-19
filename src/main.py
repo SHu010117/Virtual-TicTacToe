@@ -225,7 +225,7 @@ while running:
                     count = 0
 
 
-            if fingers == [False, True, False, False, False] and not menu:
+            if fingers[1] and not fingers[2] and not fingers[3] and not fingers[4] and not menu:
                 if not isOccupied(grid_array, index_pos):
                     if not drawStart:
                         startCell = get_cell(index_pos)
