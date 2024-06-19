@@ -148,9 +148,9 @@ show_text = True
 last_toggle_time = pygame.time.get_ticks()
 
 tmp = False
-tmpc = 1
+tmpc = 2
 
-Erasing = False
+Active = False
 
 
 # Main loop
@@ -181,7 +181,12 @@ while running:
             # Controllo se l'indice è alzato e prendo la posizione.
             fingers = fingers_up(hand_landmarks)
             if fingers == [False, False, False, False, True]:
-                tmp = True
+                if not Active:
+                    Active = True
+                    tmpc = 1
+                    tmp = True
+            else:
+                Active = False
             if fingers[1]:
                 ratio_x_to_pixel = lambda x: math.ceil(x * WIDTH)
                 ratio_y_to_pixel = lambda y: math.ceil(y * HEIGHT)
@@ -210,12 +215,12 @@ while running:
                 if draws: 
                     if drawNumber >= 0:
                         print(drawNumber)
-                        if not Erasing:
+                        if not Active:
                             draws.pop()
                             drawNumber -= 1
-                            Erasing = True
+                            Active = True
             else:
-                Erasing = False
+                Active = False
 
     if menu:
         WIN.blit(background_image, (0, 0))
