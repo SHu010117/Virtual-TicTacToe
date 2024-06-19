@@ -6,7 +6,6 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 import torch.nn.functional as F
 
-
 # get the best device for computation
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -25,11 +24,12 @@ class OurCNN(nn.Module):
 
         self.mlp = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(12544, 800),
+            nn.Linear(12544, 512),
             nn.ReLU(),
-            nn.Linear(800, 120),
+            nn.Linear(512, 128),
             nn.ReLU(),
-            nn.Linear(120, 62)
+            nn.Linear(128, 27)
+
         )
 
     def forward(self, x):
@@ -40,10 +40,8 @@ class OurCNN(nn.Module):
 
 model = OurCNN().to(device)
 
-
-
-image_path = "./Otest.png"
-model.load_state_dict(torch.load('../models/X_O_CNN.pth',  map_location=torch.device('cpu')))
+image_path = "./test_img/Screenshot 2024-06-18 alle 22.05.29.png"
+model.load_state_dict(torch.load('../models/OurCNN2.pth', map_location=torch.device('cpu')))
 model.eval()
 
 transform = transforms.Compose([
@@ -56,37 +54,20 @@ transform = transforms.Compose([
 image = Image.open(image_path)
 image = transform(image).unsqueeze(0)
 
-
 image = image.to(device)
 
-with torch.no_grad():
+with torch.no_grad():  # Disabilita il calcolo dei gradienti
     output = model(image)
-    probabilities = F.softmax(output, dim=1)
-    _, predicted = torch.max(output, 1)
-    probabilities = probabilities.cpu().numpy()[0]
+    probabilities = torch.nn.functional.softmax(output, dim=1)
+    top_prob, top_class = probabilities.topk(1, dim=1)
+    probabilities = probabilities.squeeze().cpu().numpy()
+    prediction = top_class.item()
 
 
+letters = [chr(i + 96) for i in range(1, 27)]
+probabilities_dict = {letters[i-1]: probabilities[i] for i in range(1, 27)}
+print("\nProbabilità per ogni lettera:")
+for letter, prob in probabilities_dict.items():
+    print(f'{letter}: {prob:.4f}')
 
-class_names = [
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',  # 0-9
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',  # A-Z
-    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'   # a-z
-]
 
-for i, prob in enumerate(probabilities):
-    print(f"Class {i} ({class_names[i]}): {prob:.4f}")
-
-'''
-
-label = predicted.item()
-probability_O = probabilities[0][0].item()
-probability_X = probabilities[0][1].item()
-
-if label == 0:
-    print(f"La lettera è O con una probabilità del {probability_O * 100:.2f}%")
-    print(f"Probabilità di X: {probability_X * 100:.2f}%")
-else:
-    print(f"La lettera è X con una probabilità del {probability_X * 100:.2f}%")
-    print(f"Probabilità di O: {probability_O * 100:.2f}%")
-    
-'''
