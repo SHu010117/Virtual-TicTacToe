@@ -58,8 +58,9 @@ mp_draw = mp.solutions.drawing_utils
 
 # Inizializzazione dei 'disegni'
 draws = [[]]
-drawNumber = -1
+drawNumber = 0
 drawStart = False
+startCell = None
 
 grid_array = [["", "", ""], ["", "", ""], ["", "", ""]]
 chars = ["O", "X"]
@@ -108,7 +109,34 @@ def is_thumb_up_and_fist_closed(hand_landmarks):
 
     return is_thumb_up and is_fist_closed
 
+x_coordinates = [192, 391, 610, 784]
+y_coordinates = [53, 220, 420, 640]
+def get_boundaries(index, xs, ys):
+    i = index // 3
+    j = index % 3
+    return [xs[j], xs[j+1], ys[i], ys[i+1]]
 
+def get_cell(xy):
+    global turn
+    if xy[0] <= 391 and xy[1] <= 220:
+        return 0
+    elif xy[0] <= 610 and xy[1] <= 220:
+        return 1
+    elif xy[0] > 610 and xy[1] <= 220:
+        return 2
+    elif xy[0] <= 391 and xy[1] <= 420:
+        return 3
+    elif xy[0] <= 610 and xy[1] <= 420:
+        return 4
+    elif xy[0] > 610 and xy[1] <= 420:
+        return 5
+    elif xy[0] <= 391 and xy[1] > 420:
+        return 6
+    elif xy[0] <= 610 and xy[1] > 420:
+        return 7
+    else:
+        return 8
+    
 menu = True
 running = True
 show_text = True
@@ -158,13 +186,28 @@ while running:
 
             if fingers[1] and not fingers[2] and not menu:
                 if not drawStart:
+                    startCell = get_cell(index_pos)
                     drawStart = True
                     drawNumber += 1
                     draws.append([])
+                boundaries = get_boundaries(startCell, x_coordinates, y_coordinates)
+                indexpos = min(max(indexpos[0], boundaries[0]), boundaries[1]), min(max(indexpos[1], boundaries[2]), boundaries[3])
                 draws[drawNumber].append(index_pos)
                 draw = True
             else:
                 drawStart = False
+
+            if fingers == [False, True, True, True, False]:
+                # print("ok")
+                if draws: 
+                    if drawNumber >= 0:
+                        print(drawNumber)
+                        if not Erasing:
+                            draws.pop()
+                            drawNumber -= 1
+                            Erasing = True
+            else:
+                Erasing = False
 
     if menu:
         WIN.blit(background_image, (0, 0))
@@ -175,7 +218,7 @@ while running:
 
     else:
         WIN.blit(grid_img, (0, 0))
-        draw_game(WIN, index_pos, draw, grid_array, chars, draws)
+        draw_game(WIN, index_pos, draw, grid_array, chars, startCell, draws)
         check_winner(grid_array)
 
         # ------------------------- Prova -------------------------

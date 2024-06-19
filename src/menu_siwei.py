@@ -61,8 +61,9 @@ hands = mp_hands.Hands()
 mp_draw = mp.solutions.drawing_utils
 
 draws = [[]]
-drawNumber = -1
+drawNumber = 0
 drawStart = False
+Erasing = False
 intercection_points = [(391,220),(610,220),(391,420),(610,420)]
 chars = ["O", "X"]
 turn = 0
@@ -219,7 +220,6 @@ menu = True
 running = True
 show_text = True
 last_toggle_time = pygame.time.get_ticks()
-xp, xy = 0, 0
 
 # Main loop
 while running:
@@ -255,12 +255,12 @@ while running:
                 ratio_y_to_pixel = lambda y: math.ceil(y * HEIGHT)
                 index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
 
-                '''
+                
                 # In questo modo posso spostare il pallino verso il basso senza che scompaia o faccia cose strane. (Da sistemare)
                 cx = np.interp(int(ratio_x_to_pixel(index_tip.x)), [150, WIDTH - 150], [0, WIDTH])
                 cy = np.interp(int(ratio_y_to_pixel(index_tip.y)), [150, HEIGHT - 150], [0, HEIGHT])
-                '''
-                indexpos = (ratio_x_to_pixel(index_tip.x), ratio_y_to_pixel(index_tip.y))
+                
+                indexpos = cx, cy
 
             if fingers[1] and not fingers[2] and not menu:
                 if not drawStart:
@@ -275,7 +275,20 @@ while running:
             else:
                 drawStart = False
                 # draw = False
-
+            
+            
+            if fingers == [False, True, True, True, False]:
+                # print("ok")
+                if draws: 
+                    if drawNumber >= 0:
+                        print(drawNumber)
+                        if not Erasing:
+                            draws.pop()
+                            drawNumber -= 1
+                            Erasing = True
+            else:
+                Erasing = False
+            
 
 
     if menu:

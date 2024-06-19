@@ -11,81 +11,22 @@ draw_icon = pygame.image.load('../assets/images/game images/pointing-right_23766
 draw_icon = pygame.transform.scale(draw_icon, (55, 55))
 draw_icon = pygame.transform.rotate(draw_icon, 90)
 
-move_icon = pygame.image.load('../assets/images/game images/two_fing.png')
-move_icon = pygame.transform.scale(move_icon, (50, 50))
 
 PIXELPATH = '../assets/fonts/public-pixel-font/PublicPixel-E447g.ttf'
 WHITE = (255, 255, 255)
 
-
-def print_game(arr):
-    for i in range(len(arr)):
-        print(arr[i])
+move_icon = pygame.image.load('../assets/images/game images/two_fing.png')
+move_icon = pygame.transform.scale(move_icon, (50, 50))
 
 
-def check_cell(arr, xy, chars):
+def insert_move(grid, cell_index, chars):
     global turn
-    if xy[0] <= 373 and xy[1] <= 182:
-        if arr[0][0] == "":
-            arr[0][0] = chars[turn]
-            turn = (turn + 1) % 2
-            print_game(arr)
-    elif xy[0] <= 583 and xy[1] <= 182:
-        if arr[0][1] == "":
-            arr[0][1] = chars[turn]
-            turn = (turn + 1) % 2
-            print(f"----- TURNO GIOCATORE {turn} -----")
-            print_game(arr)
-
-    elif xy[0] > 583 and xy[1] <= 182:
-        if arr[0][2] == "":
-            arr[0][2] = chars[turn]
-            turn = (turn + 1) % 2
-            print(f"----- TURNO GIOCATORE {turn} -----")
-            print_game(arr)
-
-    elif xy[0] <= 391 and xy[1] <= 420:
-        if arr[1][0] == "":
-            arr[1][0] = chars[turn]
-            turn = (turn + 1) % 2
-            print(f"----- TURNO GIOCATORE {turn} -----")
-            print_game(arr)
-
-    elif xy[0] <= 610 and xy[1] <= 420:
-        if arr[1][1] == "":
-            arr[1][1] = chars[turn]
-            turn = (turn + 1) % 2
-            print(f"----- TURNO GIOCATORE {turn} -----")
-            print_game(arr)
-
-    elif xy[0] > 610 and xy[1] <= 420:
-        if arr[1][2] == "":
-            arr[1][2] = chars[turn]
-            turn = (turn + 1) % 2
-            print(f"----- TURNO GIOCATORE {turn} -----")
-            print_game(arr)
-
-    elif xy[0] <= 391 and xy[1] > 420:
-        if arr[2][0] == "":
-            arr[2][0] = chars[turn]
-            turn = (turn + 1) % 2
-            print(f"----- TURNO GIOCATORE {turn} -----")
-            print_game(arr)
-
-    elif xy[0] <= 610 and xy[1] > 420:
-        if arr[2][1] == "":
-            arr[2][1] = chars[turn]
-            turn = (turn + 1) % 2
-            print(f"----- TURNO GIOCATORE {turn} -----")
-            print_game(arr)
-
-    else:
-        if arr[2][2] == "":
-            arr[2][2] = chars[turn]
-            turn = (turn + 1) % 2
-            print(f"----- TURNO GIOCATORE {turn} -----")
-            print_game(arr)
-
+    i = cell_index//3
+    j = cell_index%3
+    if grid[i][j] == "":
+        grid[i][j] = chars[turn]
+        turn = (turn + 1) % 2 
+        print(grid)
 
 def check_winner(grid):
     # Check rows
@@ -105,7 +46,8 @@ def check_winner(grid):
         print(grid[0][2] + " won")
 
 
-def draw_game(win, index_pos, draw, arr, chars, draws):
+#def draw_game(win, index_pos, draw, arr, chars, draws):
+def draw_game(win, index_pos, draw, grid, chars, index_cell, draws):
     # Immagine mignolo
     win.blit(pinky_up_img, (10, 10))
     # testo vicino
@@ -131,7 +73,7 @@ def draw_game(win, index_pos, draw, arr, chars, draws):
     for i in range(len(draws)):
         for j in range(len(draws[i])):
             if j != 0:
-                pygame.draw.line(win, (255, 255, 255), draws[i][j - 1], draws[i][j], 7)
-                check_cell(arr, draws[i][j - 1], chars)
+                pygame.draw.line(win, (255, 0, 255), draws[i][j-1], draws[i][j], 7)
+                insert_move(grid, index_cell, chars)
 
     pygame.display.flip()
