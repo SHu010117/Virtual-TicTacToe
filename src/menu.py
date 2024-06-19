@@ -1,15 +1,10 @@
-from urllib.parse import quote
-
 import pygame
 import os
 
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-PARENT_DIR = os.path.dirname(BASE_DIR)
+BASEDIR = os.path.dirname(os.path.abspath(__file__))
+PARENT_DIR = os.path.dirname(BASEDIR)
 PIXELPATH = os.path.join(PARENT_DIR, 'assets', 'fonts', 'public-pixel-font', 'PublicPixel-E447g.ttf')
-
-
+# PIXELPATH = '../assets/fonts/public-pixel-font/PublicPixel-E447g.ttf'
 DARK_GREEN = (24, 60, 37)
 DARK_GREEN2 = (24, 60, 37)
 
