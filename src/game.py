@@ -40,6 +40,13 @@ confirm_icon = pygame.image.load(THUMBUP)
 confirm_icon = pygame.transform.scale(confirm_icon, (90, 90))
 confirm_icon = pygame.transform.flip(confirm_icon, True, False)
 
+
+THUMBDOWN = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'pollice.png')
+menu_icon = pygame.image.load(THUMBDOWN)
+menu_icon = pygame.transform.scale(menu_icon, (50, 50))
+menu_icon = pygame.transform.flip(menu_icon, True, False)
+menu_icon = pygame.transform.rotate(menu_icon, 270)
+
 ROCKNROLLPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'Rock.png')
 newgame_icon = pygame.image.load(ROCKNROLLPATH)
 newgame_icon = pygame.transform.scale(newgame_icon, (50, 50))
@@ -156,7 +163,7 @@ def draw_confirm_window(win,width,height, bg):
 #def draw_game(win, index_pos, draw, arr, chars, draws, count):
 def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, puntX, puntO, winning_cells, winner, match_done):
     # Immagine mignolo
-    win.blit(pinky_up_img, (10, 10))
+    win.blit(menu_icon, (10, 10))
     # testo vicino
     font = pygame.font.Font(PIXELPATH, 16)
     text = font.render('MENU', True, WHITE)
