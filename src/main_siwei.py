@@ -7,14 +7,12 @@ import torch
 import torchvision.transforms as transforms
 import os
 
-
-from menu_siwei import draw_menu
-from game_siwei import draw_game
-from game_siwei import check_winner
+from menu import draw_menu
+from game import draw_game
+from game import check_winner
 from PIL import Image
 from model import OurCNN
 
-print("ok")
 BASEDIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(BASEDIR)
 
@@ -49,7 +47,6 @@ grid_img = pygame.image.load(grid_image_path)
 grid_img = pygame.transform.scale(grid_img, (WIDTH, HEIGHT))
 MODELPATH = os.path.join(PARENT_DIR, 'models', 'OurCNN2.pth')
 
-
 FPS = 60
 CLOCK = pygame.time.Clock()
 
@@ -69,6 +66,38 @@ startCell = None
 
 grid_array = [["", "", ""], ["", "", ""], ["", "", ""]]
 chars = ["O", "X"]
+
+turn = None
+
+def find_points(cell_index, xs, ys):
+    if cell_index < 3:
+        y = ys[cell_index] + (ys[cell_index + 1] - ys[cell_index])/2
+        start_x = xs[0]
+        end_x = xs[-1]
+        return (start_x, y), (end_x, y)
+    elif cell_index < 6:
+        cell_index -= 3
+        x = xs[cell_index] + (xs[cell_index + 1] - xs[cell_index])/2
+        start_y = ys[0]
+        end_y = ys[-1]
+        return (x, start_y), (x, end_y)
+    elif cell_index == 6:
+        return (xs[0], ys[0]), (xs[-1], ys[-1])
+    return (xs[-1], ys[0]), (xs[0], ys[-1])
+
+def draw_winner_line(win, cells):
+    start_pos, end_pos = find_points(cells, x_coordinates, y_coordinates)
+    pygame.draw.line(win, WHITE, start_pos, end_pos, 5)
+
+def insert_move(grid, cell_index, chars, x_prob, o_prob):
+    global turn
+    i = cell_index // 3
+    j = cell_index % 3
+    if grid[i][j] == "":
+        grid[i][j] = chars[turn]
+        turn = (turn + 1) % 2
+
+    print(grid)
 
 
 def fingers_up(hand_landmarks):
@@ -114,26 +143,30 @@ def is_thumb_up_and_fist_closed(hand_landmarks):
 
     return is_thumb_up and is_fist_closed
 
+
 x_coordinates = [192, 391, 610, 784]
 y_coordinates = [53, 220, 420, 640]
+
+
 def get_boundaries(index, xs, ys):
     i = index // 3
     j = index % 3
-    return [xs[j], xs[j+1], ys[i], ys[i+1]]
+    return [xs[j], xs[j + 1], ys[i], ys[i + 1]]
+
 
 def get_cell(xy):
     global turn
     if xy[0] <= 391 and xy[1] <= 220:
         return 0
-    elif xy[0] <= 610 and xy[1] <= 220:
+    elif xy[0] <= 610 and xy[1] <= 220 and xy[0] > 391:
         return 1
     elif xy[0] > 610 and xy[1] <= 220:
         return 2
-    elif xy[0] <= 391 and xy[1] <= 420:
+    elif xy[0] <= 391 and xy[1] <= 420 and xy[1] > 220:
         return 3
-    elif xy[0] <= 610 and xy[1] <= 420:
+    elif xy[0] <= 610 and xy[1] <= 420 and xy[0] > 391 and xy[1] > 220:
         return 4
-    elif xy[0] > 610 and xy[1] <= 420:
+    elif xy[0] > 610 and xy[1] <= 420 and xy[1] > 220:
         return 5
     elif xy[0] <= 391 and xy[1] > 420:
         return 6
@@ -142,36 +175,28 @@ def get_cell(xy):
     else:
         return 8
 
-def find_points(cell_index, xs, ys):
-    if cell_index < 3:
-        y = ys[cell_index] + (ys[cell_index + 1] - ys[cell_index])/2
-        start_x = xs[0]
-        end_x = xs[-1]
-        return (start_x, y), (end_x, y)
-    elif cell_index < 6:
-        cell_index -= 3
-        x = xs[cell_index] + (xs[cell_index + 1] - xs[cell_index])/2
-        start_y = ys[0]
-        end_y = ys[-1]
-        return (x, start_y), (x, end_y)
-    elif cell_index == 6:
-        return (xs[0], ys[0]), (xs[-1], ys[-1])
-    return (xs[-1], ys[0]), (xs[0], ys[-1])
 
-def draw_winner_line(win, cells):
-    start_pos, end_pos = find_points(cells, x_coordinates, y_coordinates)
-    pygame.draw.line(win, WHITE, start_pos, end_pos, 5)
+def isOccupied(grid, index_pos):
+    startCell = get_cell(index_pos)
+    i = startCell // 3
+    j = startCell % 3
+    if grid[i][j] == "":
+        return False
+    else:
+        return True
 
-    
 menu = True
 running = True
 show_text = True
 last_toggle_time = pygame.time.get_ticks()
+check_cell = False
+Erasing = False
+boundaries = None
+count = 0
+x_pt = 0
+y_py = 0
+match_done = False
 
-tmp = False
-tmpc = 2
-
-Active = False
 
 
 # Main loop
@@ -195,19 +220,9 @@ while running:
     draw = False
     if res.multi_hand_landmarks:
         for hand_landmarks in res.multi_hand_landmarks:
-            # Controllo se il pollice è alzato e il pugno chiuso
-            if is_thumb_up_and_fist_closed(hand_landmarks):
-                menu = False
+            fingers = fingers_up(hand_landmarks)
 
             # Controllo se l'indice è alzato e prendo la posizione.
-            fingers = fingers_up(hand_landmarks)
-            if fingers == [False, False, False, False, True]:
-                if not Active:
-                    Active = True
-                    tmpc = 1
-                    tmp = True
-            else:
-                Active = False
             if fingers[1]:
                 ratio_x_to_pixel = lambda x: math.ceil(x * WIDTH)
                 ratio_y_to_pixel = lambda y: math.ceil(y * HEIGHT)
@@ -217,31 +232,44 @@ while running:
                 cx = float(np.interp(int(ratio_x_to_pixel(index_tip.x)), [150, WIDTH - 150], [0, WIDTH]))
                 cy = float(np.interp(int(ratio_y_to_pixel(index_tip.y)), [150, HEIGHT - 150], [0, HEIGHT]))
                 index_pos = (cx, cy)
+                if boundaries is not None and count > 0:
+                    index_pos = min(max(index_pos[0], boundaries[0]), boundaries[1]), min(
+                        max(index_pos[1], boundaries[2]), boundaries[3])
 
-            if fingers[1] and not fingers[2] and not menu:
-                if not drawStart:
-                    startCell = get_cell(index_pos)
-                    drawStart = True
-                    drawNumber += 1
-                    draws.append([])
-                boundaries = get_boundaries(startCell, x_coordinates, y_coordinates)
-                index_pos = min(max(index_pos[0], boundaries[0]), boundaries[1]), min(max(index_pos[1], boundaries[2]), boundaries[3])
-                draws[drawNumber].append(index_pos)
-                draw = True
+            # Check if the draw is confirmed
+            if is_thumb_up_and_fist_closed(hand_landmarks):
+                menu = False
+                if count > 0:
+                    check_cell = True
+
+
+            if fingers[1] and not fingers[2] and not fingers[3] and not fingers[4] and not menu:
+                if not isOccupied(grid_array, index_pos):
+                    if not drawStart:
+                        startCell = get_cell(index_pos)
+                        drawStart = True
+                        drawNumber += 1
+                        draws.append([])
+                        count += 1
+                    boundaries = get_boundaries(startCell, x_coordinates, y_coordinates)
+                    index_pos = min(max(index_pos[0], boundaries[0]), boundaries[1]), min(
+                        max(index_pos[1], boundaries[2]), boundaries[3])
+                    draws[drawNumber].append(index_pos)
+                    draw = True
             else:
                 drawStart = False
 
             if fingers == [False, True, True, True, False]:
-                # print("ok")
-                if draws: 
+                if draws:
                     if drawNumber >= 0:
-                        print(drawNumber)
-                        if not Active:
+                        if not Erasing:
                             draws.pop()
                             drawNumber -= 1
-                            Active = True
+                            Erasing = True
+                            count -= 1
+
             else:
-                Active = False
+                Erasing = False
 
     if menu:
         WIN.blit(background_image, (0, 0))
@@ -251,17 +279,12 @@ while running:
         draw_menu(WIN, show_text, WIDTH, HEIGHT)
 
     else:
-        WIN.blit(grid_img, (0, 0))
-        draw_game(WIN, index_pos, draw, grid_array, chars, startCell, draws)
-        winner, winning_cells = check_winner(grid_array)
-        if winner:
-            draw_winner_line(WIN, winning_cells)
-
 
 
         # ------------------------- Prova -------------------------
-
-        if tmp and tmpc == 1:
+        x_prob = None
+        o_prob = None
+        if check_cell:
             device = ('cuda' if torch.cuda.is_available() else 'cpu')
             #x, y, width, height = 192, 53, 199, 167
             boundaries = get_boundaries(startCell, x_coordinates, y_coordinates)
@@ -287,9 +310,6 @@ while running:
 
             image = image.to(device)
 
-
-
-
             with torch.no_grad():  # Disabilita il calcolo dei gradienti
                 output = model(image)
                 probabilities = torch.nn.functional.softmax(output, dim=1)
@@ -299,16 +319,35 @@ while running:
 
             letters = [chr(i + 96) for i in range(1, 27)]
             probabilities_dict = {letters[i - 1]: probabilities[i] for i in range(1, 27)}
+
+            x_prob = round(probabilities_dict[letters[23]].item(), 2)
+            o_prob = round(probabilities_dict[letters[14]].item(), 2)
+
             print("\nProbabilità per ogni lettera:")
             print(f'{letters[23]} : {probabilities_dict[letters[23]].item():.2f}')
             print(f'{letters[14]} : {probabilities_dict[letters[14]].item():.2f}')
 
+            if turn == None:
+                if x_prob > o_prob:
+                    turn = 1
+                if o_prob >= x_prob:
+                    turn = 1
 
+            if turn == 0 and o_prob < 60:
+                for i in range(count):
+                    draws.pop()
+                    drawNumber -= 1
+            elif turn == 1 and x_prob < 60:
+                for i in range(count):
+                    draws.pop()
+                    drawNumber -= 1
+            else:
+                insert_move(grid_array, startCell, chars, x_prob, o_prob)
+                check_cell = False
+            count = 0
 
-            tmpc = 2
-            tmp = False
-            
-
-
-
-
+        WIN.blit(grid_img, (0, 0))
+        draw_game(WIN, index_pos, draw, draws, count, turn, x_prob, o_prob)
+        winner, winning_cells = check_winner(grid_array)
+        if winner:
+            draw_winner_line(WIN, winning_cells)

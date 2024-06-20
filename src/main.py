@@ -69,6 +69,64 @@ chars = ["O", "X"]
 
 turn = 0
 
+P_MIN = 0.08
+
+
+def prob_X_O():
+    device = ('cuda' if torch.cuda.is_available() else 'cpu')
+    # x, y, width, height = 192, 53, 199, 167
+    boundaries = get_boundaries(startCell, x_coordinates, y_coordinates)
+    x, y = boundaries[0], boundaries[2]
+    width, height = boundaries[1] - boundaries[0], boundaries[3] - boundaries[2]
+
+    subsurface = WIN.subsurface((x, y, width, height))
+    subsurface_array = pygame.surfarray.array3d(subsurface)
+    subsurface_array = np.transpose(subsurface_array, (1, 0, 2))
+    cropped_image = Image.fromarray(subsurface_array)
+
+    print(startCell)
+    model = OurCNN().to(device)
+    model.load_state_dict(torch.load(MODELPATH, map_location=torch.device('cpu')))
+    model.eval()
+    transform = transforms.Compose([
+        transforms.Grayscale(num_output_channels=1),
+        transforms.Resize((28, 28)),  # Assicurati che l'immagine sia 28x28
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,))
+    ])
+    image = transform(cropped_image).unsqueeze(0)
+
+    image = image.to(device)
+
+    with torch.no_grad():  # Disabilita il calcolo dei gradienti
+        output = model(image)
+        probabilities = torch.nn.functional.softmax(output, dim=1)
+        top_prob, top_class = probabilities.topk(1, dim=1)
+        probabilities = probabilities.squeeze().cpu().numpy()
+        prediction = top_class.item()
+
+    letters = [chr(i + 96) for i in range(1, 27)]
+    probabilities_dict = {letters[i - 1]: probabilities[i] for i in range(1, 27)}
+
+    x_prob = round(probabilities_dict[letters[23]].item(), 2)
+    o_prob = round(probabilities_dict[letters[14]].item(), 2)
+
+    print("\nProbabilità per ogni lettera:")
+    print(f'{letters[23]} : {probabilities_dict[letters[23]].item():.2f}')
+    print(f'{letters[14]} : {probabilities_dict[letters[14]].item():.2f}')
+
+    if turn == 0:
+        if x_prob <= P_MIN and o_prob <= P_MIN:
+            return None, None
+    elif (turn % 2) == 0:
+        if o_prob <= P_MIN:
+            return None, None
+    else:
+        if x_prob <= P_MIN:
+            return None, None
+
+    return o_prob, x_prob
+
 
 def insert_move(grid, cell_index, chars, x_prob, o_prob):
     global turn
@@ -169,6 +227,7 @@ def isOccupied(grid, index_pos):
     else:
         return True
 
+
 menu = True
 running = True
 show_text = True
@@ -177,8 +236,6 @@ check_cell = False
 Erasing = False
 boundaries = None
 count = 0
-
-
 
 # Main loop
 while running:
@@ -221,11 +278,11 @@ while running:
             if is_thumb_up_and_fist_closed(hand_landmarks):
                 menu = False
                 if count > 0:
+                    # print("ENTRAAA")
                     check_cell = True
                     count = 0
 
-
-            if fingers[1] and not fingers[2] and not fingers[3] and not fingers[4] and not menu:
+            if fingers[1] and not fingers[2] and not fingers[3] and not fingers[4] and not fingers[0] and not menu:
                 if not isOccupied(grid_array, index_pos):
                     if not drawStart:
                         startCell = get_cell(index_pos)
@@ -262,54 +319,17 @@ while running:
 
     else:
 
-
         # ------------------------- Prova -------------------------
         x_prob = None
         o_prob = None
+
         if check_cell:
-            device = ('cuda' if torch.cuda.is_available() else 'cpu')
-            #x, y, width, height = 192, 53, 199, 167
-            boundaries = get_boundaries(startCell, x_coordinates, y_coordinates)
-            x, y = boundaries[0], boundaries[2]
-            width, height = boundaries[1] - boundaries[0], boundaries[3] - boundaries[2]
-
-            subsurface = WIN.subsurface((x, y, width, height))
-            subsurface_array = pygame.surfarray.array3d(subsurface)
-            subsurface_array = np.transpose(subsurface_array, (1, 0, 2))
-            cropped_image = Image.fromarray(subsurface_array)
-
-            print(startCell)
-            model = OurCNN().to(device)
-            model.load_state_dict(torch.load(MODELPATH, map_location=torch.device('cpu')))
-            model.eval()
-            transform = transforms.Compose([
-                transforms.Grayscale(num_output_channels=1),
-                transforms.Resize((28, 28)),  # Assicurati che l'immagine sia 28x28
-                transforms.ToTensor(),
-                transforms.Normalize((0.5,), (0.5,))
-            ])
-            image = transform(cropped_image).unsqueeze(0)
-
-            image = image.to(device)
-
-            with torch.no_grad():  # Disabilita il calcolo dei gradienti
-                output = model(image)
-                probabilities = torch.nn.functional.softmax(output, dim=1)
-                top_prob, top_class = probabilities.topk(1, dim=1)
-                probabilities = probabilities.squeeze().cpu().numpy()
-                prediction = top_class.item()
-
-            letters = [chr(i + 96) for i in range(1, 27)]
-            probabilities_dict = {letters[i - 1]: probabilities[i] for i in range(1, 27)}
-
-            x_prob = round(probabilities_dict[letters[23]].item(), 2)
-            o_prob = round(probabilities_dict[letters[14]].item(), 2)
-
-            print("\nProbabilità per ogni lettera:")
-            print(f'{letters[23]} : {probabilities_dict[letters[23]].item():.2f}')
-            print(f'{letters[14]} : {probabilities_dict[letters[14]].item():.2f}')
-
-            insert_move(grid_array, startCell, chars, x_prob, o_prob)
+            o_prob, x_prob = prob_X_O()
+            if o_prob is not None:
+                insert_move(grid_array, startCell, chars, x_prob, o_prob)
+            else:
+                print("RIFAI LA MOSSA")
+                # Cacella disegno
             check_cell = False
 
         WIN.blit(grid_img, (0, 0))
