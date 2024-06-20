@@ -42,6 +42,8 @@ pygame.display.set_caption('Tic Tac Toe')
 background_image_path = os.path.join(PARENT_DIR, 'assets', 'images', 'background', 'prova3.jpeg')
 background_image = pygame.image.load(background_image_path)
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
+background_image_small = pygame.transform.scale(background_image, (WIDTH//2, HEIGHT//2))
+
 grid_image_path = os.path.join(PARENT_DIR, 'assets', 'images', 'background', 'tic.jpg')
 grid_img = pygame.image.load(grid_image_path)
 grid_img = pygame.transform.scale(grid_img, (WIDTH, HEIGHT))
@@ -296,6 +298,15 @@ while running:
                 if count > 0:
                     check_cell = True
 
+            # Se vuoi confermare di uscire dal gioco nel menù principale
+            if fingers == [True, True, True, True, True] and confirm_window:
+                menu = True
+                confirm_window = False
+
+
+            if fingers == [False, False, False, False, False] and confirm_window:
+                confirm_window = False
+
             if fingers[1] and not fingers[2] and not fingers[3] and not fingers[4] and not fingers[0] and not menu and not match_done:
                 if not isOccupied(grid_array, index_pos):
                     if not drawStart:
@@ -325,7 +336,7 @@ while running:
             else:
                 Erasing = False
             
-            if fingers == [True, False, False, False, True] and match_done:
+            if fingers == [True, False, False, False, True] and match_done or (fingers == [True, True, True, True, True] and confirm_window):
                 match_done = False
                 draws = [[]]
                 drawNumber = 0
@@ -335,7 +346,7 @@ while running:
                 puntX = 0
 
 
-
+            # Se vuoi uscire nel menù
             if fingers == [False, False, False, False, True]:
                 confirm_window = True
 
@@ -346,11 +357,14 @@ while running:
             pygame.draw.circle(WIN, (255, 0, 0), index_pos, 6)
         draw_menu(WIN, show_text, WIDTH, HEIGHT)
 
+    elif confirm_window:
+        # schermata per confermare
+        # menu = True
+        #confirm_window = False
+        WIN.blit(background_image_small, (WIDTH // 2 - (WIDTH// 4), (HEIGHT // 4)))
+        pygame.display.flip()
+
     else:
-
-        # ------------------------- Prova -------------------------
-
-
         if check_cell:
             o_prob, x_prob = prob_X_O()
             first_move(x_prob, o_prob)
@@ -399,12 +413,7 @@ while running:
             match_done = True
 
 
-        if confirm_window:
-            # schermata per confermare
-            # menu = True
-            confirm_window = False
 
-            WIN.blit(background_image, (50, 50))
 
 
 
