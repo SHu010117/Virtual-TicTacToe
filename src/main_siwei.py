@@ -94,8 +94,11 @@ def insert_move(grid, cell_index, chars, x_prob, o_prob):
     i = cell_index // 3
     j = cell_index % 3
     if grid[i][j] == "":
-        grid[i][j] = chars[turn]
-        turn = (turn + 1) % 2
+        if turn == 0:
+            if x_prob > o_prob:
+                turn = 1
+        grid[i][j] = chars[(turn % 2)]
+        turn += 1
 
     print(grid)
 
@@ -194,7 +197,7 @@ Erasing = False
 boundaries = None
 count = 0
 x_pt = 0
-y_py = 0
+o_pt = 0
 match_done = False
 
 
@@ -344,6 +347,10 @@ while running:
             else:
                 insert_move(grid_array, startCell, chars, x_prob, o_prob)
                 check_cell = False
+                if turn == 0:
+                    o_pt += o_prob
+                else:
+                    x_pt += x_prob
             count = 0
 
         WIN.blit(grid_img, (0, 0))
