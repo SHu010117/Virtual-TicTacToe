@@ -30,8 +30,32 @@ confirm_icon = pygame.image.load(THUMBUP)
 confirm_icon = pygame.transform.scale(confirm_icon, (90, 90))
 confirm_icon = pygame.transform.flip(confirm_icon, True, False)
 
+def check_winner(grid):
+    # Check rows
+    for row in range(3):
+        if grid[row][0] == grid[row][1] == grid[row][2] and grid[row][0] != "":
+            return grid[row][0], row
 
+    # Check columns
+    for col in range(3):
+        if grid[0][col] == grid[1][col] == grid[2][col] and grid[0][col] != "":
+            return grid[0][col], col + 3
 
+    # Check diagonals
+    if grid[0][0] == grid[1][1] == grid[2][2] and grid[0][0] != "":
+        return grid[0][0], 6
+    if grid[0][2] == grid[1][1] == grid[2][0] and grid[0][2] != "":
+        return grid[0][2], 7
+    count = 0
+    for row in range(3):
+        for col in range(3):
+            if grid[row][col] != "":
+                count += 1
+    if count == 9:
+        return "Pareggio", []        
+    return None, []
+
+'''
 def check_winner(grid):
     # Check rows
     for row in grid:
@@ -48,7 +72,7 @@ def check_winner(grid):
         print(grid[0][0] + " won")
     if grid[0][2] == grid[1][1] == grid[2][0] and grid[0][2] != "":
         print(grid[0][2] + " won")
-
+'''
 
 #def draw_game(win, index_pos, draw, arr, chars, draws, count):
 def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min):
