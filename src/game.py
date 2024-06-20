@@ -10,6 +10,14 @@ PINKYUPPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'pinky
 pinky_up_img = pygame.image.load(PINKYUPPATH)
 pinky_up_img = pygame.transform.scale(pinky_up_img, (50, 50))
 
+PUGNOPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'pugno.png')
+fist_img = pygame.image.load(PUGNOPATH)
+fist_img = pygame.transform.scale(fist_img, (50, 50))
+
+APERTAPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'manoaperta.png')
+open_img = pygame.image.load(APERTAPATH)
+open_img = pygame.transform.scale(open_img, (50, 50))
+
 DRAWPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'pointing-right_237663.png')
 draw_icon = pygame.image.load(DRAWPATH)
 draw_icon = pygame.transform.scale(draw_icon, (55, 55))
@@ -31,6 +39,9 @@ confirm_icon = pygame.transform.flip(confirm_icon, True, False)
 ROCKNROLLPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'Rock.png')
 newgame_icon = pygame.image.load(ICONPATH)
 newgame_icon = pygame.transform.scale(move_icon, (50, 50))
+
+
+DARK_GREEN = (24, 60, 37)
 
 x_coordinates = [192, 391, 610, 784]
 y_coordinates = [53, 220, 420, 640]
@@ -120,6 +131,22 @@ def draw_winner_line(win, cells, winner, po, px):
     win.blit(result, (200, 300))
     # pygame.display.flip()
 
+def draw_confirm_window(win,width,height, bg):
+    win.blit(bg, (width // 2 - (width // 4), (height // 4)))
+
+    font = pygame.font.Font(PIXELPATH, 30)
+    text = font.render('CONFERMA', True, DARK_GREEN)
+    win.blit(text, ((width // 2 - (width // 4) + 120), (height // 4) + 40))
+
+    win.blit(open_img, ((width // 2 - (width // 4) + text.get_width() + 140), (height // 4) + 30))
+
+
+    text = font.render('CONTINUA', True, DARK_GREEN)
+    win.blit(text, ((width // 2 - (width // 4) + 120), (height // 4) + 140))
+    win.blit(fist_img, ((width // 2 - (width // 4) + text.get_width() + 140), (height // 4) + 130))
+
+
+    # pygame.display.flip()
 
 #def draw_game(win, index_pos, draw, arr, chars, draws, count):
 def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, puntX, puntO, winning_cells, winner, match_done):
@@ -178,4 +205,3 @@ def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, p
     if winner:
         draw_winner_line(win, winning_cells, winner, puntO, puntX)
 
-    pygame.display.flip()

@@ -8,7 +8,7 @@ import torchvision.transforms as transforms
 import os
 
 from menu import draw_menu
-from game import draw_game
+from game import draw_game, draw_confirm_window
 from game import check_winner
 from PIL import Image
 from model import OurCNN
@@ -301,13 +301,13 @@ while running:
             # Se vuoi confermare di uscire dal gioco nel menù principale
             if fingers == [True, True, True, True, True] and confirm_window:
                 menu = True
-                confirm_window = False
+
 
 
             if fingers == [False, False, False, False, False] and confirm_window:
                 confirm_window = False
 
-            if fingers[1] and not fingers[2] and not fingers[3] and not fingers[4] and not fingers[0] and not menu and not match_done:
+            if fingers[1] and not fingers[2] and not fingers[3] and not fingers[4] and not fingers[0] and not menu and not match_done and not confirm_window:
                 if not isOccupied(grid_array, index_pos):
                     if not drawStart:
                         startCell = get_cell(index_pos)
@@ -336,7 +336,7 @@ while running:
             else:
                 Erasing = False
             
-            if fingers == [False, True, False, False, True] and match_done or (fingers == [True, True, True, True, True] and confirm_window):
+            if (fingers == [False, True, False, False, True] and match_done) or (fingers == [True, True, True, True, True] and confirm_window):
                 match_done = False
                 draws = [[]]
                 drawNumber = 0
@@ -344,10 +344,13 @@ while running:
                 grid_array = [["", "", ""], ["", "", ""], ["", "", ""]]
                 puntO = 0
                 puntX = 0
+                o_prob = None
+                x_prob = None
+                confirm_window = False
 
 
             # Se vuoi uscire nel menù
-            if fingers == [False, False, False, False, True]:
+            if fingers == [False, False, True, False, False] and not menu:
                 confirm_window = True
 
     if menu:
@@ -356,14 +359,6 @@ while running:
         if index_pos:
             pygame.draw.circle(WIN, (255, 0, 0), index_pos, 6)
         draw_menu(WIN, show_text, WIDTH, HEIGHT)
-
-    elif confirm_window:
-        # schermata per confermare
-        # menu = True
-        #confirm_window = False
-        WIN.blit(background_image_small, (WIDTH // 2 - (WIDTH// 4), (HEIGHT // 4)))
-        pygame.display.flip()
-
     else:
 
         # ------------------------- Prova -------------------------
@@ -412,10 +407,13 @@ while running:
         WIN.blit(grid_img, (0, 0))
         winner, winning_cells = check_winner(grid_array)
         draw_game(WIN, index_pos, draw, draws, count, turn, x_prob, o_prob, P_MIN, puntX, puntO, winning_cells, winner, match_done)
+        if confirm_window:
+            draw_confirm_window(WIN, WIDTH, HEIGHT, background_image_small)
         if winner:
             # points = find_points(winning_cells, x_coordinates, y_coordinates)
             match_done = True
 
+        pygame.display.flip()
 
 
 
