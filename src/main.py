@@ -324,7 +324,7 @@ while running:
             else:
                 Erasing = False
             
-            if fingers == [True, False, False, False, True] and match_done:
+            if fingers == [False, True, False, False, True] and match_done:
                 match_done = False
                 draws = [[]]
                 drawNumber = 0
