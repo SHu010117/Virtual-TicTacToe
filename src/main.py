@@ -66,7 +66,9 @@ drawNumber = 0
 drawStart = False
 startCell = None
 
-grid_array = [["", "", ""], ["", "", ""], ["", "", ""]]
+grid_array = [["", "", ""],
+              ["", "", ""],
+              ["", "", ""]]
 chars = ["O", "X"]
 
 turn = 0
@@ -344,6 +346,7 @@ while running:
                 grid_array = [["", "", ""], ["", "", ""], ["", "", ""]]
                 puntO = 0
                 puntX = 0
+                count = 0
                 o_prob = None
                 x_prob = None
                 confirm_window = False

@@ -42,6 +42,7 @@ newgame_icon = pygame.transform.scale(newgame_icon, (50, 50))
 
 
 DARK_GREEN = (24, 60, 37)
+RED_ORANGE = (255, 68, 51)
 
 x_coordinates = [192, 391, 610, 784]
 y_coordinates = [53, 220, 420, 640]
@@ -114,7 +115,7 @@ def draw_winner_line(win, cells, winner, po, px):
     start_pos, end_pos = find_points(cells, x_coordinates, y_coordinates)
     if winner != "Pareggio":
         pygame.draw.line(win, (255, 255, 255), start_pos, end_pos, 5)
-    font = pygame.font.Font(PIXELPATH, 20)
+    font = pygame.font.Font(PIXELPATH, 25)
     if winner == "Pareggio":
         if po > px:
             text = "Pareggio: O ha fatto più punti"
@@ -127,8 +128,8 @@ def draw_winner_line(win, cells, winner, po, px):
     else:
         text = "X ha vinto facendo tris"
 
-    result = font.render(text, True, (255, 49, 49))
-    win.blit(result, (200, 300))
+    result = font.render(text, True, RED_ORANGE)
+    win.blit(result, (185, 300))
     # pygame.display.flip()
 
 def draw_confirm_window(win,width,height, bg):
@@ -192,9 +193,10 @@ def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, p
             text = font.render('Your drawing is very bad. Try again.', True, NICE_RED)
             win.blit(text, (170, 20))
     if match_done:
-        win.blit(newgame_icon, (855, 307))
+        font = pygame.font.Font(PIXELPATH, 16)
+        win.blit(newgame_icon, (875, 320))
         text = font.render('New Game', True, WHITE)
-        win.blit(text, (850, 404))
+        win.blit(text, (840, 390))
 
 
     for i in range(len(draws)):
