@@ -223,6 +223,9 @@ def isOccupied(grid, index_pos):
         return True
 
 
+    
+
+
 menu = True
 running = True
 show_text = True
@@ -320,6 +323,17 @@ while running:
 
             else:
                 Erasing = False
+            
+            if fingers == [True, False, False, False, True] and match_done:
+                match_done = False
+                draws = [[]]
+                drawNumber = 0
+                # startCell = None
+                grid_array = [["", "", ""], ["", "", ""], ["", "", ""]]
+                puntO = 0
+                puntX = 0
+
+
 
     if menu:
         WIN.blit(background_image, (0, 0))
