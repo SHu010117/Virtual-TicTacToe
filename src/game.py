@@ -18,6 +18,10 @@ APERTAPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'manoap
 open_img = pygame.image.load(APERTAPATH)
 open_img = pygame.transform.scale(open_img, (50, 50))
 
+CANCELLAPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'tap.png')
+delete_img = pygame.image.load(CANCELLAPATH)
+delete_img = pygame.transform.scale(delete_img, (90, 90))
+
 DRAWPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'pointing-right_237663.png')
 draw_icon = pygame.image.load(DRAWPATH)
 draw_icon = pygame.transform.scale(draw_icon, (55, 55))
@@ -114,7 +118,7 @@ def find_points(cell_index, xs, ys):
 def draw_winner_line(win, cells, winner, po, px):
     start_pos, end_pos = find_points(cells, x_coordinates, y_coordinates)
     if winner != "Pareggio":
-        pygame.draw.line(win, (255, 255, 255), start_pos, end_pos, 5)
+        pygame.draw.line(win, (0,255,0), start_pos, end_pos, 7)
     font = pygame.font.Font(PIXELPATH, 25)
     if winner == "Pareggio":
         if po > px:
@@ -182,9 +186,13 @@ def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, p
         # print(index_pos)
 
     if count > 0:
-        win.blit(confirm_icon, (855, 307))
+        win.blit(confirm_icon, (855, 187))
         text = font.render('CONFIRM', True, WHITE)
-        win.blit(text, (850, 404))
+        win.blit(text, (870, 284))
+
+        win.blit(delete_img, (855, 350))
+        text = font.render('DELETE', True, WHITE)
+        win.blit(text, (870, 447))
 
     if o_prob is not None:
         if ((turn % 2) == 0 and o_prob <= p_min) or ((turn % 2) == 1 and x_prob <= p_min):

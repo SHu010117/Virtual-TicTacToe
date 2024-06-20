@@ -184,6 +184,30 @@ def is_thumb_up_and_fist_closed(hand_landmarks):
     return is_thumb_up and is_fist_closed
 
 
+def is_thumb_down_and_fist_closed(hand_landmarks):
+    # Punti chiave dita
+    thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
+    thumb_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP]
+    index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+    index_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+    middle_tip = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+    ring_tip = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP]
+    pinky_tip = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
+
+    # Verificare se il pollice è alzato
+    is_thumb_down = thumb_tip.y > thumb_mcp.y
+
+    # Verificare se il pugno è chiusto:
+    is_fist_closed = (
+            (min(thumb_mcp.x, index_mcp.x) - EPSILON <= index_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
+            (min(thumb_mcp.x, index_mcp.x) - EPSILON <= middle_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
+            (min(thumb_mcp.x, index_mcp.x) - EPSILON <= ring_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON) and
+            (min(thumb_mcp.x, index_mcp.x) - EPSILON <= pinky_tip.x <= max(thumb_mcp.x, index_mcp.x) + EPSILON)
+    )
+
+    return is_fist_closed and is_thumb_down
+
+
 x_coordinates = [192, 391, 610, 784]
 y_coordinates = [53, 220, 420, 640]
 
@@ -353,7 +377,7 @@ while running:
 
 
             # Se vuoi uscire nel menù
-            if fingers == [False, False, True, False, False] and not menu:
+            if is_thumb_down_and_fist_closed(hand_landmarks) and not menu:
                 confirm_window = True
 
     if menu:
