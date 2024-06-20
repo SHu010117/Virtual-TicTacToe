@@ -75,7 +75,7 @@ def check_winner(grid):
 '''
 
 #def draw_game(win, index_pos, draw, arr, chars, draws, count):
-def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min):
+def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, puntX, puntO):
     # Immagine mignolo
     win.blit(pinky_up_img, (10, 10))
     # testo vicino
@@ -91,6 +91,15 @@ def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min):
     text = font.render('MOVE', True, WHITE)
     win.blit(text, (10, 250))
 
+
+    font = pygame.font.Font(PIXELPATH, 11)
+
+    text = font.render(f'AVERAGE X : {puntX}', True, WHITE)
+    win.blit(text, (8, 580))
+
+    text = font.render(f'AVERAGE O : {puntO}', True, WHITE)
+    win.blit(text, (8, 610))
+
     if draw:
         pygame.draw.circle(win, (0, 255, 0), index_pos, 7)
         # print(index_pos)
@@ -98,19 +107,22 @@ def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min):
         pygame.draw.circle(win, (255, 0, 0), index_pos, 7)
         # print(index_pos)
 
+    if count > 0:
+        win.blit(confirm_icon, (855, 307))
+        text = font.render('CONFIRM', True, WHITE)
+        win.blit(text, (850, 404))
 
     if o_prob is not None:
         if ((turn % 2) == 0 and o_prob <= p_min) or ((turn % 2) == 1 and x_prob <= p_min):
             # print("entri")
             font = pygame.font.Font(PIXELPATH, 20)
             text = font.render('Your drawing is very bad. Try again.', True, NICE_RED)
-            win.blit(text, (170, 24))
+            win.blit(text, (170, 20))
 
 
-    if count > 0:
-        win.blit(confirm_icon, (865, 307))
-        text = font.render('CONFIRM', True, WHITE)
-        win.blit(text, (860, 404))
+
+
+
 
     for i in range(len(draws)):
         for j in range(len(draws[i])):

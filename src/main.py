@@ -233,12 +233,17 @@ count = 0
 x_prob = None
 o_prob = None
 
+puntX = 0
+puntO = 0
+
 
 def remove_draw(count):
     while count > 0:
         draws.pop()
         count -= 1
 
+def calculate_point(prob):
+    return 1 + (((prob - P_MIN) * 99) / (1 - P_MIN))
 
 # Main loop
 while running:
@@ -327,14 +332,37 @@ while running:
         if check_cell:
             o_prob, x_prob = prob_X_O()
             first_move(x_prob, o_prob)
-            if (o_prob > P_MIN and (turn % 2) == 0) or (x_prob > P_MIN and (turn % 2) == 1):
+            if (o_prob > P_MIN and (turn % 2) == 0):
+                # print(o_prob)
+                ris = calculate_point(o_prob)
+                if puntO != 0:
+                    puntO += ris
+                    puntO /= 2
+                else:
+                    puntO += ris
+
+                puntO = round(puntO, 2)
+
+                insert_move(grid_array, startCell, chars, x_prob, o_prob)
+                x_prob = None
+                o_prob = None
+            elif (x_prob > P_MIN and (turn % 2) == 1):
+                # un po' uno schifo, ma funziona :D
+                ris = calculate_point(x_prob)
+                if puntX != 0:
+                    puntX += ris
+                    puntX /= 2
+                else:
+                    puntX += ris
+
+
+                puntX = round(puntX, 2)
+
                 insert_move(grid_array, startCell, chars, x_prob, o_prob)
                 x_prob = None
                 o_prob = None
             else:
-                print("RIFAI Il DISEGNO")
                 remove_draw(count)
-                print("prima di esser modificato: ", drawNumber)
                 drawNumber -= count
             count = 0
             check_cell = False
@@ -342,6 +370,5 @@ while running:
 
 
         WIN.blit(grid_img, (0, 0))
-        # print("DAJE ROMA 1 ", x_prob, o_prob)
-        draw_game(WIN, index_pos, draw, draws, count, turn, x_prob, o_prob, P_MIN)
+        draw_game(WIN, index_pos, draw, draws, count, turn, x_prob, o_prob, P_MIN, puntX, puntO)
         check_winner(grid_array)
