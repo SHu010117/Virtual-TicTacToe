@@ -115,15 +115,7 @@ def prob_X_O():
     print(f'{letters[23]} : {probabilities_dict[letters[23]].item():.2f}')
     print(f'{letters[14]} : {probabilities_dict[letters[14]].item():.2f}')
 
-    if turn == 0:
-        if x_prob <= P_MIN and o_prob <= P_MIN:
-            return None, None
-    elif (turn % 2) == 0:
-        if o_prob <= P_MIN:
-            return None, None
-    else:
-        if x_prob <= P_MIN:
-            return None, None
+
 
     return o_prob, x_prob
 
@@ -236,6 +228,15 @@ check_cell = False
 Erasing = False
 boundaries = None
 count = 0
+x_prob = None
+o_prob = None
+
+
+def remove_draw(count):
+    while count > 0:
+        draws.pop()
+        count -= 1
+
 
 # Main loop
 while running:
@@ -278,9 +279,7 @@ while running:
             if is_thumb_up_and_fist_closed(hand_landmarks):
                 menu = False
                 if count > 0:
-                    # print("ENTRAAA")
                     check_cell = True
-                    count = 0
 
             if fingers[1] and not fingers[2] and not fingers[3] and not fingers[4] and not fingers[0] and not menu:
                 if not isOccupied(grid_array, index_pos):
@@ -293,6 +292,7 @@ while running:
                     boundaries = get_boundaries(startCell, x_coordinates, y_coordinates)
                     index_pos = min(max(index_pos[0], boundaries[0]), boundaries[1]), min(
                         max(index_pos[1], boundaries[2]), boundaries[3])
+                    print(drawNumber)
                     draws[drawNumber].append(index_pos)
                     draw = True
             else:
@@ -300,7 +300,7 @@ while running:
 
             if fingers == [False, True, True, True, False]:
                 if draws:
-                    if drawNumber >= 0:
+                    if drawNumber >= 0 and count > 0:
                         if not Erasing:
                             draws.pop()
                             drawNumber -= 1
@@ -320,18 +320,25 @@ while running:
     else:
 
         # ------------------------- Prova -------------------------
-        x_prob = None
-        o_prob = None
+
 
         if check_cell:
             o_prob, x_prob = prob_X_O()
-            if o_prob is not None:
+            if (o_prob > P_MIN and (turn % 2) == 0) or (x_prob > P_MIN and (turn % 2) == 1):
                 insert_move(grid_array, startCell, chars, x_prob, o_prob)
+                x_prob = None
+                o_prob = None
             else:
-                print("RIFAI LA MOSSA")
-                # Cacella disegno
+                print("RIFAI Il DISEGNO")
+                remove_draw(count)
+                print("prima di esser modificato: ", drawNumber)
+                drawNumber -= count
+            count = 0
             check_cell = False
 
+
+
         WIN.blit(grid_img, (0, 0))
-        draw_game(WIN, index_pos, draw, draws, count, turn, x_prob, o_prob)
+        # print("DAJE ROMA 1 ", x_prob, o_prob)
+        draw_game(WIN, index_pos, draw, draws, count, turn, x_prob, o_prob, P_MIN)
         check_winner(grid_array)
