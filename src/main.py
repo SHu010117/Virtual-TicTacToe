@@ -230,7 +230,7 @@ def find_points(cell_index, xs, ys):
 def draw_winner_line(win,cells, winner, po, px):
     start_pos, end_pos = find_points(cells, x_coordinates, y_coordinates)
     pygame.draw.line(win, (255,255,255), start_pos, end_pos, 5)
-    font = pygame.font.Font(PIXELPATH, 16)
+    font = pygame.font.Font(PIXELPATH, 20)
     if winner == "Pareggio":
         if po > px:
             text = "Pareggio: O ha fatto più punti"
@@ -413,8 +413,4 @@ while running:
         if winner:
             # points = find_points(winning_cells, x_coordinates, y_coordinates)
             match_done = True
-            if winner != "Pareggio":
-                    print("Pareggio")
-            else:
-                print(winner + " won")
-            draw_winner_line(WIN, winning_cells, winner)
+            draw_winner_line(WIN, winning_cells, winner, puntO, puntX)
