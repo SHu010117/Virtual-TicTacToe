@@ -336,7 +336,7 @@ while running:
             else:
                 Erasing = False
             
-            if fingers == [True, False, False, False, True] and match_done or (fingers == [True, True, True, True, True] and confirm_window):
+            if fingers == [False, True, False, False, True] and match_done or (fingers == [True, True, True, True, True] and confirm_window):
                 match_done = False
                 draws = [[]]
                 drawNumber = 0
@@ -365,6 +365,10 @@ while running:
         pygame.display.flip()
 
     else:
+
+        # ------------------------- Prova -------------------------
+
+
         if check_cell:
             o_prob, x_prob = prob_X_O()
             first_move(x_prob, o_prob)
@@ -407,7 +411,7 @@ while running:
 
         WIN.blit(grid_img, (0, 0))
         winner, winning_cells = check_winner(grid_array)
-        draw_game(WIN, index_pos, draw, draws, count, turn, x_prob, o_prob, P_MIN, puntX, puntO, winning_cells, winner)
+        draw_game(WIN, index_pos, draw, draws, count, turn, x_prob, o_prob, P_MIN, puntX, puntO, winning_cells, winner, match_done)
         if winner:
             # points = find_points(winning_cells, x_coordinates, y_coordinates)
             match_done = True

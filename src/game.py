@@ -28,6 +28,10 @@ confirm_icon = pygame.image.load(THUMBUP)
 confirm_icon = pygame.transform.scale(confirm_icon, (90, 90))
 confirm_icon = pygame.transform.flip(confirm_icon, True, False)
 
+ROCKNROLLPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'Rock.png')
+newgame_icon = pygame.image.load(ICONPATH)
+newgame_icon = pygame.transform.scale(move_icon, (50, 50))
+
 x_coordinates = [192, 391, 610, 784]
 y_coordinates = [53, 220, 420, 640]
 
@@ -118,7 +122,7 @@ def draw_winner_line(win, cells, winner, po, px):
 
 
 #def draw_game(win, index_pos, draw, arr, chars, draws, count):
-def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, puntX, puntO, winning_cells, winner):
+def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, puntX, puntO, winning_cells, winner, match_done):
     # Immagine mignolo
     win.blit(pinky_up_img, (10, 10))
     # testo vicino
@@ -160,7 +164,10 @@ def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, p
             font = pygame.font.Font(PIXELPATH, 20)
             text = font.render('Your drawing is very bad. Try again.', True, NICE_RED)
             win.blit(text, (170, 20))
-
+    if match_done:
+        win.blit(newgame_icon, (855, 307))
+        text = font.render('New Game', True, WHITE)
+        win.blit(text, (850, 404))
 
 
     for i in range(len(draws)):
