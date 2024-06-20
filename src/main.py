@@ -233,6 +233,7 @@ boundaries = None
 count = 0
 x_prob = None
 o_prob = None
+confirm_window = False
 
 puntX = 0
 puntO = 0
@@ -321,6 +322,9 @@ while running:
             else:
                 Erasing = False
 
+            if fingers == [False, False, False, False, True]:
+                confirm_window = True
+
     if menu:
         WIN.blit(background_image, (0, 0))
         # Disegno punto indice
@@ -379,3 +383,14 @@ while running:
         if winner:
             # points = find_points(winning_cells, x_coordinates, y_coordinates)
             match_done = True
+
+
+        if confirm_window:
+            # schermata per confermare
+            # menu = True
+            confirm_window = False
+
+            WIN.blit(background_image, (50, 50))
+
+
+
