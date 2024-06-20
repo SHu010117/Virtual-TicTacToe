@@ -389,7 +389,7 @@ while running:
 
         WIN.blit(grid_img, (0, 0))
         winner, winning_cells = check_winner(grid_array)
-        draw_game(WIN, index_pos, draw, draws, count, turn, x_prob, o_prob, P_MIN, puntX, puntO, winning_cells, winner)
+        draw_game(WIN, index_pos, draw, draws, count, turn, x_prob, o_prob, P_MIN, puntX, puntO, winning_cells, winner, match_done)
         if winner:
             # points = find_points(winning_cells, x_coordinates, y_coordinates)
             match_done = True
