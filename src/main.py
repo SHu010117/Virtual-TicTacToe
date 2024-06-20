@@ -119,15 +119,17 @@ def prob_X_O():
 
     return o_prob, x_prob
 
+def first_move(x_prob, o_prob):
+    global turn
+    if turn == 0 and x_prob > o_prob:
+        turn = 1
+
 
 def insert_move(grid, cell_index, chars, x_prob, o_prob):
     global turn
     i = cell_index // 3
     j = cell_index % 3
     if grid[i][j] == "":
-        if turn == 0:
-            if x_prob > o_prob:
-                turn = 1
         grid[i][j] = chars[(turn % 2)]
         turn += 1
 
@@ -324,6 +326,7 @@ while running:
 
         if check_cell:
             o_prob, x_prob = prob_X_O()
+            first_move(x_prob, o_prob)
             if (o_prob > P_MIN and (turn % 2) == 0) or (x_prob > P_MIN and (turn % 2) == 1):
                 insert_move(grid_array, startCell, chars, x_prob, o_prob)
                 x_prob = None
