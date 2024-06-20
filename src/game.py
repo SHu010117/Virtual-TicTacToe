@@ -37,8 +37,8 @@ confirm_icon = pygame.transform.scale(confirm_icon, (90, 90))
 confirm_icon = pygame.transform.flip(confirm_icon, True, False)
 
 ROCKNROLLPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'Rock.png')
-newgame_icon = pygame.image.load(ICONPATH)
-newgame_icon = pygame.transform.scale(move_icon, (50, 50))
+newgame_icon = pygame.image.load(ROCKNROLLPATH)
+newgame_icon = pygame.transform.scale(newgame_icon, (50, 50))
 
 
 DARK_GREEN = (24, 60, 37)
