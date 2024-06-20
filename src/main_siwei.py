@@ -141,6 +141,27 @@ def get_cell(xy):
         return 7
     else:
         return 8
+
+def find_points(cell_index, xs, ys):
+    if cell_index < 3:
+        y = ys[cell_index] + (ys[cell_index + 1] - ys[cell_index])/2
+        start_x = xs[0]
+        end_x = xs[-1]
+        return (start_x, y), (end_x, y)
+    elif cell_index < 6:
+        cell_index -= 3
+        x = xs[cell_index] + (xs[cell_index + 1] - xs[cell_index])/2
+        start_y = ys[0]
+        end_y = ys[-1]
+        return (x, start_y), (x, end_y)
+    elif cell_index == 6:
+        return (xs[0], ys[0]), (xs[-1], ys[-1])
+    return (xs[-1], ys[0]), (xs[0], ys[-1])
+
+def draw_winner_line(win, cells):
+    start_pos, end_pos = find_points(cells, x_coordinates, y_coordinates)
+    pygame.draw.line(win, WHITE, start_pos, end_pos, 5)
+
     
 menu = True
 running = True
@@ -232,7 +253,9 @@ while running:
     else:
         WIN.blit(grid_img, (0, 0))
         draw_game(WIN, index_pos, draw, grid_array, chars, startCell, draws)
-        check_winner(grid_array)
+        winner, winning_cells = check_winner(grid_array)
+        if winner:
+            draw_winner_line(WIN, winning_cells)
 
 
 

@@ -35,20 +35,22 @@ def insert_move(grid, cell_index, chars):
 
 def check_winner(grid):
     # Check rows
-    for row in grid:
-        if row[0] == row[1] == row[2] and row[0] != "":
-            print(row[0] + " won")
+    for row in range(3):
+        if grid[row][0] == grid[row][1] == grid[row][2] and grid[row][0] != "":
+            return grid[row][0], row
 
     # Check columns
     for col in range(3):
         if grid[0][col] == grid[1][col] == grid[2][col] and grid[0][col] != "":
-            print(grid[0][col] + " won")
+            return grid[0][col], col + 3
 
     # Check diagonals
     if grid[0][0] == grid[1][1] == grid[2][2] and grid[0][0] != "":
-        print(grid[0][0] + " won")
+        return grid[0][0], 6
     if grid[0][2] == grid[1][1] == grid[2][0] and grid[0][2] != "":
-        print(grid[0][2] + " won")
+        return grid[0][2], 7
+
+    return None, []
 
 
 #def draw_game(win, index_pos, draw, arr, chars, draws):
@@ -79,6 +81,7 @@ def draw_game(win, index_pos, draw, grid, chars, index_cell, draws):
         for j in range(len(draws[i])):
             if j != 0:
                 pygame.draw.line(win, (255, 255, 255), draws[i][j-1], draws[i][j], 7)
-                insert_move(grid, index_cell, chars)
+                if index_cell != None:
+                    insert_move(grid, index_cell, chars)
 
     pygame.display.flip()
