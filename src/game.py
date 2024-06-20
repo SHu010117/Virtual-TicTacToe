@@ -2,7 +2,6 @@ import math
 import pygame
 import os
 
-
 BASEDIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(BASEDIR)
 intersection_points = [(373, 182), (583, 182), (373, 347), (583, 347)]
@@ -16,7 +15,6 @@ draw_icon = pygame.image.load(DRAWPATH)
 draw_icon = pygame.transform.scale(draw_icon, (55, 55))
 draw_icon = pygame.transform.rotate(draw_icon, 90)
 
-
 PIXELPATH = os.path.join(PARENT_DIR, 'assets', 'fonts', 'public-pixel-font', 'PublicPixel-E447g.ttf')
 WHITE = (255, 255, 255)
 NICE_RED = (255, 49, 49)
@@ -29,6 +27,10 @@ THUMBUP = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'thumbs-up
 confirm_icon = pygame.image.load(THUMBUP)
 confirm_icon = pygame.transform.scale(confirm_icon, (90, 90))
 confirm_icon = pygame.transform.flip(confirm_icon, True, False)
+
+x_coordinates = [192, 391, 610, 784]
+y_coordinates = [53, 220, 420, 640]
+
 
 def check_winner(grid):
     # Check rows
@@ -52,8 +54,9 @@ def check_winner(grid):
             if grid[row][col] != "":
                 count += 1
     if count == 9:
-        return "Pareggio", []        
+        return "Pareggio", 8
     return None, []
+
 
 '''
 def check_winner(grid):
@@ -74,8 +77,48 @@ def check_winner(grid):
         print(grid[0][2] + " won")
 '''
 
+
+def find_points(cell_index, xs, ys):
+    if cell_index < 3:
+        y = ys[cell_index] + (ys[cell_index + 1] - ys[cell_index]) / 2
+        start_x = xs[0]
+        end_x = xs[-1]
+        return (start_x, y), (end_x, y)
+    elif cell_index < 6:
+        cell_index -= 3
+        x = xs[cell_index] + (xs[cell_index + 1] - xs[cell_index]) / 2
+        start_y = ys[0]
+        end_y = ys[-1]
+        return (x, start_y), (x, end_y)
+    elif cell_index == 6:
+        return (xs[0], ys[0]), (xs[-1], ys[-1])
+    return (xs[-1], ys[0]), (xs[0], ys[-1])
+
+
+def draw_winner_line(win, cells, winner, po, px):
+    start_pos, end_pos = find_points(cells, x_coordinates, y_coordinates)
+    if winner != "Pareggio":
+        pygame.draw.line(win, (255, 255, 255), start_pos, end_pos, 5)
+    font = pygame.font.Font(PIXELPATH, 20)
+    if winner == "Pareggio":
+        if po > px:
+            text = "Pareggio: O ha fatto più punti"
+        elif px > po:
+            text = "Pareggio: X ha fatto più punti"
+        else:
+            text = "Pareggio: stesso punteggio"
+    elif winner == "O":
+        text = "O ha vinto facendo tris"
+    else:
+        text = "X ha vinto facendo tris"
+
+    result = font.render(text, True, (255, 49, 49))
+    win.blit(result, (200, 300))
+    # pygame.display.flip()
+
+
 #def draw_game(win, index_pos, draw, arr, chars, draws, count):
-def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, puntX, puntO):
+def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, puntX, puntO, winning_cells, winner):
     # Immagine mignolo
     win.blit(pinky_up_img, (10, 10))
     # testo vicino
@@ -90,7 +133,6 @@ def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, p
     win.blit(move_icon, (10, 190))
     text = font.render('MOVE', True, WHITE)
     win.blit(text, (10, 250))
-
 
     font = pygame.font.Font(PIXELPATH, 11)
 
@@ -121,12 +163,12 @@ def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, p
 
 
 
-
-
-
     for i in range(len(draws)):
         for j in range(len(draws[i])):
             if j != 0:
-                pygame.draw.line(win, (255, 255, 255), draws[i][j-1], draws[i][j], 7)
+                pygame.draw.line(win, (255, 255, 255), draws[i][j - 1], draws[i][j], 7)
+
+    if winner:
+        draw_winner_line(win, winning_cells, winner, puntO, puntX)
 
     pygame.display.flip()
