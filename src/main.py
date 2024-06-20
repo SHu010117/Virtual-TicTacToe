@@ -211,6 +211,41 @@ def get_cell(xy):
     else:
         return 8
 
+def find_points(cell_index, xs, ys):
+    if cell_index < 3:
+        y = ys[cell_index] + (ys[cell_index + 1] - ys[cell_index])/2
+        start_x = xs[0]
+        end_x = xs[-1]
+        return (start_x, y), (end_x, y)
+    elif cell_index < 6:
+        cell_index -= 3
+        x = xs[cell_index] + (xs[cell_index + 1] - xs[cell_index])/2
+        start_y = ys[0]
+        end_y = ys[-1]
+        return (x, start_y), (x, end_y)
+    elif cell_index == 6:
+        return (xs[0], ys[0]), (xs[-1], ys[-1])
+    return (xs[-1], ys[0]), (xs[0], ys[-1])
+
+def draw_winner_line(win,cells, winner, po, px):
+    start_pos, end_pos = find_points(cells, x_coordinates, y_coordinates)
+    pygame.draw.line(win, (255,255,255), start_pos, end_pos, 5)
+    font = pygame.font.Font(PIXELPATH, 16)
+    if winner == "Pareggio":
+        if po > px:
+            text = "Pareggio: O ha fatto più punti"
+        elif px > po:
+            text = "Pareggio: X ha fatto più punti"
+        else:
+            text = "Pareggio: stesso punteggio"
+    elif winner == "O":
+        text = "O ha vinto facendo tris"
+    else:
+        text = "X ha vinto facendo tris"
+        
+    result = font.render(text, True, (255, 49, 49))
+    win.blit(result, (200, 300))
+    pygame.display.flip()
 
 def isOccupied(grid, index_pos):
     startCell = get_cell(index_pos)
@@ -235,6 +270,9 @@ o_prob = None
 
 puntX = 0
 puntO = 0
+
+match_done = False
+PIXELPATH = os.path.join(PARENT_DIR, 'assets', 'fonts', 'public-pixel-font', 'PublicPixel-E447g.ttf')
 
 
 def remove_draw(count):
@@ -283,12 +321,12 @@ while running:
                         max(index_pos[1], boundaries[2]), boundaries[3])
 
             # Check if the draw is confirmed
-            if is_thumb_up_and_fist_closed(hand_landmarks):
+            if is_thumb_up_and_fist_closed(hand_landmarks) and not match_done:
                 menu = False
                 if count > 0:
                     check_cell = True
 
-            if fingers[1] and not fingers[2] and not fingers[3] and not fingers[4] and not fingers[0] and not menu:
+            if fingers[1] and not fingers[2] and not fingers[3] and not fingers[4] and not fingers[0] and not menu and not match_done:
                 if not isOccupied(grid_array, index_pos):
                     if not drawStart:
                         startCell = get_cell(index_pos)
@@ -299,7 +337,7 @@ while running:
                     boundaries = get_boundaries(startCell, x_coordinates, y_coordinates)
                     index_pos = min(max(index_pos[0], boundaries[0]), boundaries[1]), min(
                         max(index_pos[1], boundaries[2]), boundaries[3])
-                    print(drawNumber)
+                    # print(drawNumber)
                     draws[drawNumber].append(index_pos)
                     draw = True
             else:
@@ -371,4 +409,12 @@ while running:
 
         WIN.blit(grid_img, (0, 0))
         draw_game(WIN, index_pos, draw, draws, count, turn, x_prob, o_prob, P_MIN, puntX, puntO)
-        check_winner(grid_array)
+        winner, winning_cells = check_winner(grid_array)
+        if winner:
+            # points = find_points(winning_cells, x_coordinates, y_coordinates)
+            match_done = True
+            if winner != "Pareggio":
+                    print("Pareggio")
+            else:
+                print(winner + " won")
+            draw_winner_line(WIN, winning_cells, winner)
