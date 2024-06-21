@@ -132,7 +132,7 @@ def first_move(x_prob, o_prob):
         turn = 1
 
 # register a valid move
-def insert_move(grid, cell_index, chars, x_prob, o_prob):
+def insert_move(grid, cell_index, chars):
     global turn
     i = cell_index // 3
     j = cell_index % 3
@@ -375,7 +375,7 @@ while running:
 
                 puntO = round(puntO, 2)
 
-                insert_move(grid_array, startCell, chars, x_prob, o_prob)
+                insert_move(grid_array, startCell, chars)
                 x_prob = None
                 o_prob = None
             elif (x_prob > P_MIN and (turn % 2) == 1):
@@ -387,7 +387,7 @@ while running:
                 else:
                     puntX += ris
                 puntX = round(puntX, 2)
-                insert_move(grid_array, startCell, chars, x_prob, o_prob)
+                insert_move(grid_array, startCell, chars)
                 x_prob = None
                 o_prob = None
             else:
