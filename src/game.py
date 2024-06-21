@@ -2,6 +2,7 @@ import math
 import pygame
 import os
 
+# different icon images for the hand gestures
 BASEDIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(BASEDIR)
 intersection_points = [(373, 182), (583, 182), (373, 347), (583, 347)]
@@ -58,7 +59,7 @@ RED_ORANGE = (255, 68, 51)
 x_coordinates = [192, 391, 610, 784]
 y_coordinates = [53, 220, 420, 640]
 
-
+# checking win condition
 def check_winner(grid):
     # Check rows
     for row in range(3):
@@ -84,27 +85,7 @@ def check_winner(grid):
         return "Pareggio", 8
     return None, []
 
-
-'''
-def check_winner(grid):
-    # Check rows
-    for row in grid:
-        if row[0] == row[1] == row[2] and row[0] != "":
-            print(row[0] + " won")
-
-    # Check columns
-    for col in range(3):
-        if grid[0][col] == grid[1][col] == grid[2][col] and grid[0][col] != "":
-            print(grid[0][col] + " won")
-
-    # Check diagonals
-    if grid[0][0] == grid[1][1] == grid[2][2] and grid[0][0] != "":
-        print(grid[0][0] + " won")
-    if grid[0][2] == grid[1][1] == grid[2][0] and grid[0][2] != "":
-        print(grid[0][2] + " won")
-'''
-
-
+# finds the coordinates for line which acrosses the winnin cells
 def find_points(cell_index, xs, ys):
     if cell_index < 3:
         y = ys[cell_index] + (ys[cell_index + 1] - ys[cell_index]) / 2
@@ -121,7 +102,7 @@ def find_points(cell_index, xs, ys):
         return (xs[0], ys[0]), (xs[-1], ys[-1])
     return (xs[-1], ys[0]), (xs[0], ys[-1])
 
-
+# draw the line of victory
 def draw_winner_line(win, cells, winner, po, px):
     start_pos, end_pos = find_points(cells, x_coordinates, y_coordinates)
     if winner != "Pareggio":
@@ -143,6 +124,7 @@ def draw_winner_line(win, cells, winner, po, px):
     win.blit(result, (185, 300))
     # pygame.display.flip()
 
+# confirm window when trying to return to menu
 def draw_confirm_window(win,width,height, bg):
     win.blit(bg, (width // 2 - (width // 4), (height // 4)))
 
@@ -160,7 +142,7 @@ def draw_confirm_window(win,width,height, bg):
 
     # pygame.display.flip()
 
-#def draw_game(win, index_pos, draw, arr, chars, draws, count):
+# Function which allows user to draw on the grid 
 def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, puntX, puntO, winning_cells, winner, match_done):
     # Immagine mignolo
     win.blit(menu_icon, (10, 10))
@@ -202,11 +184,16 @@ def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, p
         win.blit(text, (870, 447))
 
     if o_prob is not None:
-        if ((turn % 2) == 0 and o_prob <= p_min) or ((turn % 2) == 1 and x_prob <= p_min):
+        if((turn % 2) == 1 and o_prob >= p_min) or ((turn % 2) == 0 and x_prob >= p_min):
+            font = pygame.font.Font(PIXELPATH, 20)
+            text = font.render("It is not you turn. Try again.", True, NICE_RED)
+            win.blit(text, (170, 20))
+        elif ((turn % 2) == 0 and o_prob <= p_min) or ((turn % 2) == 1 and x_prob <= p_min):
             # print("entri")
             font = pygame.font.Font(PIXELPATH, 20)
             text = font.render('Your drawing is very bad. Try again.', True, NICE_RED)
             win.blit(text, (170, 20))
+        
     if match_done:
         font = pygame.font.Font(PIXELPATH, 16)
         win.blit(newgame_icon, (875, 320))

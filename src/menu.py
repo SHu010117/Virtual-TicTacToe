@@ -1,6 +1,10 @@
 import pygame
 import os
 
+'''
+Here's the menu interface
+'''
+
 BASEDIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(BASEDIR)
 PIXELPATH = os.path.join(PARENT_DIR, 'assets', 'fonts', 'public-pixel-font', 'PublicPixel-E447g.ttf')
