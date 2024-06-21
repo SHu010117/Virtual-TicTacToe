@@ -12,7 +12,6 @@ from game import check_winner
 from PIL import Image
 from model import OurCNN
 
-
 '''
 Here we implement the main file which contains the most important and
 basic functions such as:
@@ -49,7 +48,7 @@ pygame.display.set_caption('Tic Tac Toe')
 background_image_path = os.path.join(PARENT_DIR, 'assets', 'images', 'background', 'prova3.jpeg')
 background_image = pygame.image.load(background_image_path)
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
-background_image_small = pygame.transform.scale(background_image, (WIDTH//2, HEIGHT//2))
+background_image_small = pygame.transform.scale(background_image, (WIDTH // 2, HEIGHT // 2))
 
 grid_image_path = os.path.join(PARENT_DIR, 'assets', 'images', 'background', 'tic.jpg')
 grid_img = pygame.image.load(grid_image_path)
@@ -78,6 +77,7 @@ grid_array = [["", "", ""],
 chars = ["O", "X"]
 turn = 0
 P_MIN = 0.08
+
 
 # verifying which caracter(O/X) has been drawn using the our CNN model
 def prob_X_O():
@@ -125,11 +125,13 @@ def prob_X_O():
 
     return o_prob, x_prob
 
+
 # checking which is the first character to be drawn
 def first_move(x_prob, o_prob):
     global turn
     if turn == 0 and x_prob > o_prob:
         turn = 1
+
 
 # register a valid move
 def insert_move(grid, cell_index, chars):
@@ -141,6 +143,7 @@ def insert_move(grid, cell_index, chars):
         turn += 1
 
     print(grid)
+
 
 # checking which fingers are up
 def fingers_up(hand_landmarks):
@@ -161,6 +164,7 @@ def fingers_up(hand_landmarks):
         mp_hands.HandLandmark.PINKY_PIP].y)
 
     return fingers
+
 
 # funciton to detect thumb up or down
 def is_thumb_up_or_down_and_fist_closed(hand_landmarks):
@@ -187,14 +191,17 @@ def is_thumb_up_or_down_and_fist_closed(hand_landmarks):
 
     return is_thumb_up and is_fist_closed, is_thumb_down and is_fist_closed
 
+
 x_coordinates = [192, 391, 610, 784]
 y_coordinates = [53, 220, 420, 640]
+
 
 # boundaries for the given cell index
 def get_boundaries(index, xs, ys):
     i = index // 3
     j = index % 3
     return [xs[j], xs[j + 1], ys[i], ys[i + 1]]
+
 
 # get the cell index
 def get_cell(xy):
@@ -218,6 +225,7 @@ def get_cell(xy):
     else:
         return 8
 
+
 def isOccupied(grid, index_pos):
     startCell = get_cell(index_pos)
     i = startCell // 3
@@ -227,10 +235,12 @@ def isOccupied(grid, index_pos):
     else:
         return True
 
+
 def remove_draw(count):
     while count > 0:
         draws.pop()
         count -= 1
+
 
 def calculate_point(prob):
     return 1 + (((prob - P_MIN) * 99) / (1 - P_MIN))
@@ -252,7 +262,8 @@ puntX = 0
 puntO = 0
 match_done = False
 PIXELPATH = os.path.join(PARENT_DIR, 'assets', 'fonts', 'public-pixel-font', 'PublicPixel-E447g.ttf')
-
+winner = None
+winning_cells = None
 # Main loop
 while running:
     current_time = pygame.time.get_ticks()
@@ -333,9 +344,10 @@ while running:
                             count -= 1
             else:
                 Erasing = False
-            
+
             # gesture to start a new game when the game's done
-            if (fingers == [False, True, False, False, True] and match_done) or (fingers == [True, True, True, True, True] and confirm_window):
+            if (fingers == [False, True, False, False, True] and match_done) or (
+                    fingers == [True, True, True, True, True] and confirm_window):
                 match_done = False
                 draws = [[]]
                 drawNumber = 0
@@ -347,6 +359,9 @@ while running:
                 o_prob = None
                 x_prob = None
                 confirm_window = False
+                winner = None
+                winning_cells = None
+                turn = 0
 
             # Se vuoi uscire nel menù
             if thumb_down and not menu:
@@ -374,8 +389,8 @@ while running:
                     puntO += ris
 
                 puntO = round(puntO, 2)
-
                 insert_move(grid_array, startCell, chars)
+                winner, winning_cells = check_winner(grid_array)
                 x_prob = None
                 o_prob = None
             elif (x_prob > P_MIN and (turn % 2) == 1):
@@ -388,6 +403,8 @@ while running:
                     puntX += ris
                 puntX = round(puntX, 2)
                 insert_move(grid_array, startCell, chars)
+                winner, winning_cells = check_winner(grid_array)
+
                 x_prob = None
                 o_prob = None
             else:
@@ -398,15 +415,11 @@ while running:
 
         # show game window
         WIN.blit(grid_img, (0, 0))
-        winner, winning_cells = check_winner(grid_array)
-        draw_game(WIN, index_pos, draw, draws, count, turn, x_prob, o_prob, P_MIN, puntX, puntO, winning_cells, winner, match_done)
+
+        draw_game(WIN, index_pos, draw, draws, count, turn, x_prob, o_prob, P_MIN, puntX, puntO, winning_cells, winner,
+                  match_done)
         if confirm_window:
             draw_confirm_window(WIN, WIDTH, HEIGHT, background_image_small)
         if winner:
             match_done = True
         pygame.display.flip()
-
-
-
-
-
