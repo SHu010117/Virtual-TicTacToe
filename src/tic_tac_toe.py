@@ -48,7 +48,7 @@ class TicTacToeGame:
         self.puntO = 0
         self.puntX = 0
         self.x_prob = None
-        self.y_prob = None
+        self.o_prob = None
         self.turn = 0
         self.draws = [[]]
         self.drawNumber = 0
@@ -104,10 +104,10 @@ class TicTacToeGame:
                     self.confirm_window = False
 
                 # when only index finger's up, start drawing
-                if fingers == [False, True, False, False, False] and not self.menu and not self.match_done and not self.confirm_window:
-                    if not self.isOccupied(self.grid_array, self.index_pos):
+                if fingers == [False, True, False, False, False] and not self.menu and not self.match_done and not self.confirm_window:                    
+                    if not self.isOccupied(self.grid_array, self.index_pos):                        
                         if not self.drawStart:
-                            self.startCell = self.get_cell(self.index_pos)
+                            self.startCell = self.get_cell(self.index_pos)                     
                             self.drawStart = True
                             self.drawNumber += 1
                             self.draws.append([])
@@ -263,13 +263,13 @@ class TicTacToeGame:
             self.draws.pop()
             self.count -= 1
     
-    def get_boundaries(index, xs, ys):
+    def get_boundaries(self, index, xs, ys):
         i = index // 3
         j = index % 3
         return [xs[j], xs[j + 1], ys[i], ys[i + 1]]
 
     # get the cell index
-    def get_cell(xy):
+    def get_cell(self, xy):
         if xy[0] <= 391 and xy[1] <= 220:
             return 0
         elif xy[0] <= 610 and xy[1] <= 220 and xy[0] > 391:
