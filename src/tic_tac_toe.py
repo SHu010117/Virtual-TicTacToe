@@ -11,40 +11,49 @@ from menu import draw_menu
 from game import draw_game, draw_confirm_window, check_winner
 import constants
 
+'''
+In these file we implemented the class TicTacTie which
+ contains functions that makes the system/game work correctly
+By using the parameters return by function of HandTracker class
+ we are able to implement different hand gesture for different 
+ tasks. Since the frame is refreshed every time we introduced
+ different variables for the correct execution and to avoid some 
+ actions to be performed multiple times
+'''
+
 class TicTacToeGame:
     def __init__(self):
+
+        # set the path to access images and other utils
         self.BASEDIR = os.path.dirname(os.path.abspath(__file__))
         self.PARENT_DIR = os.path.dirname(self.BASEDIR)
 
         self.WHITE = (255, 255, 255)
 
+        # initialize pygame window
         pygame.init()
         pygame.mixer.init()
-
         self.WIDTH, self.HEIGHT = constants.WIDTH, constants.HEIGHT
         self.WIN = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption('Tic Tac Toe')
 
-        '''
-        self.background_image = self.load_and_scale_image('assets/images/background/prova3.jpeg', self.WIDTH, self.HEIGHT)
-        self.background_image_small = pygame.transform.scale(self.background_image, (self.WIDTH // 2, self.HEIGHT // 2))
-        self.grid_img = self.load_and_scale_image('assets/images/background/tic.jpg', self.WIDTH, self.HEIGHT)
-        '''
+        # import images for menu and game graphic interface
         self.background_image_path = os.path.join(self.PARENT_DIR, 'assets', 'images', 'background', 'prova3.jpeg')
         self.background_image = pygame.image.load(self.background_image_path)
         self.background_image = pygame.transform.scale(self.background_image, (self.WIDTH, self.HEIGHT))
         self.background_image_small = pygame.transform.scale(self.background_image, (self.WIDTH // 2, self.HEIGHT // 2))
-
         self.grid_image_path = os.path.join(self.PARENT_DIR, 'assets', 'images', 'background', 'tic.jpg')
         self.grid_img = pygame.image.load(self.grid_image_path)
         self.grid_img = pygame.transform.scale(self.grid_img, (self.WIDTH, self.HEIGHT))
         
+        # access model to recognize drawing 
         self.MODELPATH = os.path.join(self.PARENT_DIR, 'models', 'OurCNN2.pth')
         self.PIXELPATH = os.path.join(self.PARENT_DIR, 'assets', 'fonts', 'public-pixel-font', 'PublicPixel-E447g.ttf')
 
         self.FPS = 60
         self.CLOCK = pygame.time.Clock()
 
+        # set of variables for the correct execution
         self.puntO = 0
         self.puntX = 0
         self.x_prob = None
@@ -73,6 +82,15 @@ class TicTacToeGame:
         self.draw = False
 
     def run(self, hand_tracker):
+        
+        '''
+        Function to run the game
+        We call the function from HandTracker class which allows us to
+         to implement the recognition of hand gestures
+        Basing on the gesture detected, the system is able to perform
+         the corresponding task
+        '''
+        
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -86,6 +104,7 @@ class TicTacToeGame:
             self.index_pos = None
             self.index_pos, hand_detected, thumb_up, thumb_down, fingers = hand_tracker.get_hand_position(frame)
             if hand_detected:
+                # we decided to limit the movement of user inside the box once a drawing is made
                 if self.boundaries is not None and self.count > 0:
                     self.index_pos = min(max(self.index_pos[0], self.boundaries[0]), self.boundaries[1]), min(
                         max(self.index_pos[1], self.boundaries[2]), self.boundaries[3])
@@ -104,7 +123,9 @@ class TicTacToeGame:
                     self.confirm_window = False
 
                 # when only index finger's up, start drawing
+                # we used an array to store the coordinates
                 if fingers == [False, True, False, False, False] and not self.menu and not self.match_done and not self.confirm_window:                    
+                    # user can draw only in an empty cell
                     if not self.isOccupied(self.grid_array, self.index_pos):                        
                         if not self.drawStart:
                             self.startCell = self.get_cell(self.index_pos)                     
@@ -115,13 +136,13 @@ class TicTacToeGame:
                         self.boundaries = self.get_boundaries(self.startCell, self.x_coordinates, self.y_coordinates)
                         self.index_pos = min(max(self.index_pos[0], self.boundaries[0]), self.boundaries[1]), min(
                             max(self.index_pos[1], self.boundaries[2]), self.boundaries[3])
-                        # print(drawNumber)
                         self.draws[self.drawNumber].append(self.index_pos)
                         self.draw = True
                 else:
                     self.drawStart = False
 
                 # gesture to delete last segment
+                # we used an boolean variable Erasing to delete one segment at time
                 if fingers == [False, True, True, True, False]:
                     if self.draws:
                         if self.drawNumber >= 0 and self.count > 0:
@@ -133,7 +154,7 @@ class TicTacToeGame:
                 else:
                     self.Erasing = False
 
-                # gesture to start a new game when the game's done
+                # gestures to start a new game when the game's done
                 if (fingers == [False, True, False, False, True] and self.match_done) or (
                         fingers == [True, True, True, True, True] and self.confirm_window):
                     self.new_game()
@@ -145,6 +166,16 @@ class TicTacToeGame:
             self.update_display()
 
     def update_display(self):
+
+        '''
+        Display the menu or game window
+        If the confirm drawing gesture is detected (thumb up)
+         we cut the image frame and send it to our model to recognize 
+         if the prediction says it's an O or X we update the 
+         grid state and scoring(probability average), otherwise user
+         has to redraw.
+        '''
+
         if self.menu:
             self.WIN.blit(self.background_image, (0, 0))
             if self.index_pos:
@@ -161,7 +192,7 @@ class TicTacToeGame:
                     self.insert_move()
                     print("Okk")
                     self.winner, self.winning_cells = check_winner(self.grid_array)
-                    x_prob = o_prob = None
+                    self.x_prob = self.o_prob = None
                 elif self.x_prob > self.P_MIN and (self.turn % 2) == 1:
                     ris = self.calculate_point(self.x_prob)
                     self.puntX = (self.puntX + ris) / 2 if self.puntX != 0 else ris
@@ -183,6 +214,7 @@ class TicTacToeGame:
                 self.match_done = True
             pygame.display.flip()
     
+    # reset the values to start a new game
     def new_game(self):
         self.match_done = False
         self.draws = [[]]
@@ -198,6 +230,7 @@ class TicTacToeGame:
         self.winning_cells = None
         self.turn = 0
     
+    # predicte the drawing using our CNN model
     def prob_X_O(self):
         device = ('cuda' if torch.cuda.is_available() else 'cpu')
         # x, y, width, height = 192, 53, 199, 167
@@ -243,13 +276,16 @@ class TicTacToeGame:
 
         return o_prob, x_prob
 
+    # after recognizing the first drawing, we individuate who(O/X) started first
     def first_move(self):
         if self.turn == 0 and self.x_prob > self.o_prob:
             self.turn = 1
 
+    # calculate the scoring
     def calculate_point(self, prob):
         return 1 + (((prob - self.P_MIN) * 99) / (1 - self.P_MIN))
 
+    # update the grid array
     def insert_move(self):
         i = self.startCell // 3
         j = self.startCell % 3
@@ -259,18 +295,20 @@ class TicTacToeGame:
 
         print(self.grid_array)
 
+    # if model didn't recognize the drawing, eliminate the drawing
     def remove_draw(self):
         count = self.count
         while count > 0:
             self.draws.pop()
             count -= 1
     
+    # finds the boundaries to limit user's move inside the box
     def get_boundaries(self, index, xs, ys):
         i = index // 3
         j = index % 3
         return [xs[j], xs[j + 1], ys[i], ys[i + 1]]
 
-    # get the cell index
+    # get the cell index (0-8)
     def get_cell(self, xy):
         if xy[0] <= 391 and xy[1] <= 220:
             return 0
@@ -290,7 +328,8 @@ class TicTacToeGame:
             return 7
         else:
             return 8
-        
+    
+    # detects if the cell is already used
     def isOccupied(self, grid, index_pos):
         startCell = self.get_cell(index_pos)
         i = startCell // 3
