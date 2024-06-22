@@ -166,7 +166,6 @@ def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, p
 
     text = font.render(f'AVERAGE O : {puntO}', True, WHITE)
     win.blit(text, (8, 610))
-
     if draw:
         pygame.draw.circle(win, (0, 255, 0), index_pos, 7)
         # print(index_pos)
