@@ -1,4 +1,4 @@
 
 
-WIDTH = 1080
+WIDTH = 1000
 HEIGHT = 680

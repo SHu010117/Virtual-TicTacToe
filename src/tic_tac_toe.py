@@ -153,23 +153,24 @@ class TicTacToeGame:
         else:
             if self.check_cell:
                 self.o_prob, self.x_prob = self.prob_X_O()
-                self.first_move(x_prob, o_prob)
-                if o_prob > self.P_MIN and (self.turn % 2) == 0:
-                    ris = self.calculate_point(o_prob)
+                self.first_move()
+                if self.o_prob > self.P_MIN and (self.turn % 2) == 0:
+                    ris = self.calculate_point(self.o_prob)
                     self.puntO = (self.puntO + ris) / 2 if self.puntO != 0 else ris
                     self.puntO = round(self.puntO, 2)
-                    self.insert_move(self.grid_array, self.startCell, self.chars)
+                    self.insert_move()
+                    print("Okk")
                     self.winner, self.winning_cells = check_winner(self.grid_array)
                     x_prob = o_prob = None
-                elif x_prob > self.P_MIN and (self.turn % 2) == 1:
-                    ris = self.calculate_point(x_prob)
+                elif self.x_prob > self.P_MIN and (self.turn % 2) == 1:
+                    ris = self.calculate_point(self.x_prob)
                     self.puntX = (self.puntX + ris) / 2 if self.puntX != 0 else ris
                     self.puntX = round(self.puntX, 2)
-                    self.insert_move(self.grid_array, self.startCell, self.chars)
+                    self.insert_move()
                     self.winner, self.winning_cells = check_winner(self.grid_array)
                     self.x_prob = self.o_prob = None
                 else:
-                    self.remove_draw(self.count)
+                    self.remove_draw()
                     self.drawNumber -= self.count
                 self.count = 0
                 self.check_cell = False
@@ -242,26 +243,27 @@ class TicTacToeGame:
 
         return o_prob, x_prob
 
-    def first_move(self, x_prob, o_prob):
-        if self.turn == 0 and x_prob > o_prob:
+    def first_move(self):
+        if self.turn == 0 and self.x_prob > self.o_prob:
             self.turn = 1
 
     def calculate_point(self, prob):
         return 1 + (((prob - self.P_MIN) * 99) / (1 - self.P_MIN))
 
-    def insert_move(self, grid, cell_index, chars):
-        i = cell_index // 3
-        j = cell_index % 3
-        if grid[i][j] == "":
-            grid[i][j] = chars[(self.turn % 2)]
+    def insert_move(self):
+        i = self.startCell // 3
+        j = self.startCell % 3
+        if self.grid_array[i][j] == "":
+            self.grid_array[i][j] = self.chars[(self.turn % 2)]
             self.turn += 1
 
-        print(grid)
+        print(self.grid_array)
 
     def remove_draw(self):
-        while self.count > 0:
+        count = self.count
+        while count > 0:
             self.draws.pop()
-            self.count -= 1
+            count -= 1
     
     def get_boundaries(self, index, xs, ys):
         i = index // 3
