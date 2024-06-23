@@ -11,55 +11,33 @@ Different images are imported which are icons of hand gestures to inform the use
 # different icon images for the hand gestures
 BASEDIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(BASEDIR)
-PINKYUPPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'pinky_up.png')
-pinky_up_img = pygame.image.load(PINKYUPPATH)
-pinky_up_img = pygame.transform.scale(pinky_up_img, (50, 50))
 
-PUGNOPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'pugno.png')
-fist_img = pygame.image.load(PUGNOPATH)
-fist_img = pygame.transform.scale(fist_img, (50, 50))
+def load_and_scale(PARENT_DIR, relative_path):
+    PATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', relative_path)
+    icon = pygame.image.load(PATH)
+    icon = pygame.transform.scale(icon, (50, 50))
+    return icon
 
-APERTAPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'manoaperta.png')
-open_img = pygame.image.load(APERTAPATH)
-open_img = pygame.transform.scale(open_img, (50, 50))
-
-CANCELLAPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'tap.png')
-delete_img = pygame.image.load(CANCELLAPATH)
+pinky_up_img = load_and_scale(PARENT_DIR, 'pinky_up.png')
+fist_img = load_and_scale(PARENT_DIR, 'pugno.png')
+open_img = load_and_scale(PARENT_DIR, 'manoaperta.png')
+delete_img = load_and_scale(PARENT_DIR, 'tap.png')
 delete_img = pygame.transform.scale(delete_img, (90, 90))
-
-DRAWPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'pointing-right_237663.png')
-draw_icon = pygame.image.load(DRAWPATH)
-draw_icon = pygame.transform.scale(draw_icon, (55, 55))
+draw_icon = load_and_scale(PARENT_DIR, 'pointing-right_237663.png')
 draw_icon = pygame.transform.rotate(draw_icon, 90)
-
 PIXELPATH = os.path.join(PARENT_DIR, 'assets', 'fonts', 'public-pixel-font', 'PublicPixel-E447g.ttf')
 WHITE = (255, 255, 255)
 NICE_RED = (255, 49, 49)
-
-ICONPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'two_fing.png')
-move_icon = pygame.image.load(ICONPATH)
-move_icon = pygame.transform.scale(move_icon, (50, 50))
-
-THUMBUP = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'thumbs-up.png')
-confirm_icon = pygame.image.load(THUMBUP)
+move_icon = load_and_scale(PARENT_DIR, 'two_fing.png')
+confirm_icon = load_and_scale(PARENT_DIR, 'thumbs-up.png')
 confirm_icon = pygame.transform.scale(confirm_icon, (90, 90))
 confirm_icon = pygame.transform.flip(confirm_icon, True, False)
-
-
-THUMBDOWN = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'pollice.png')
-menu_icon = pygame.image.load(THUMBDOWN)
-menu_icon = pygame.transform.scale(menu_icon, (50, 50))
+menu_icon = load_and_scale(PARENT_DIR, 'pollice.png')
 menu_icon = pygame.transform.flip(menu_icon, True, False)
 menu_icon = pygame.transform.rotate(menu_icon, 270)
-
-ROCKNROLLPATH = os.path.join(PARENT_DIR, 'assets', 'images', 'game images', 'Rock.png')
-newgame_icon = pygame.image.load(ROCKNROLLPATH)
-newgame_icon = pygame.transform.scale(newgame_icon, (50, 50))
-
-
+newgame_icon = load_and_scale(PARENT_DIR, 'Rock.png')
 DARK_GREEN = (24, 60, 37)
 RED_ORANGE = (255, 68, 51)
-
 x_coordinates = [192, 391, 610, 784]
 y_coordinates = [53, 220, 420, 640]
 
