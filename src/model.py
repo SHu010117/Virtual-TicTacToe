@@ -8,6 +8,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Subset
 from torchvision.datasets import ImageFolder
 from torchvision.transforms import ToTensor
+
 '''
 batch_size = 64
 
@@ -18,12 +19,12 @@ transform = transforms.Compose([
 ])
 
 # load the training and the test datasets
-train_data = torchvision.datasets.EMNIST(root='./data', split='byclass', train=True, download=True,
+train_data = torchvision.datasets.EMNIST(root='./data', split='letters', train=True, download=True,
                                          transform=transform)
-test_data = torchvision.datasets.EMNIST(root='./data', split='byclass', train=False, download=True,
+test_data = torchvision.datasets.EMNIST(root='./data', split='letters', train=False, download=True,
                                         transform=transform)
-train_dataloader = DataLoader(train_data, batch_size=batch_size)
-test_dataloader = DataLoader(test_data, batch_size=batch_size)
+train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
+test_dataloader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
 
 
 
@@ -32,6 +33,7 @@ test_dataloader = DataLoader(test_data, batch_size=batch_size)
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
 '''
+
 # Passo 3: Definire la struttura della CNN
 class OurCNN(nn.Module):
     def __init__(self):
@@ -64,7 +66,7 @@ class OurCNN(nn.Module):
 model = OurCNN().to(device)
 
 # define the hyperparameters
-epochs = 3
+epochs = 9
 learning_rate = 0.001
 
 # define the loss function
@@ -74,7 +76,7 @@ loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
 # define the accuracy metric
-metric = torchmetrics.Accuracy(task='multiclass', num_classes=62).to(device)
+metric = torchmetrics.Accuracy(task='multiclass', num_classes=27).to(device)
 
 
 # defining the training loop
@@ -143,4 +145,6 @@ for epoch in range(epochs):
     print("Testing...")
     test_loop(test_dataloader, model)
 
+print("Done!")
+torch.save(model.state_dict(), "./OurCNN.pth")
 '''
