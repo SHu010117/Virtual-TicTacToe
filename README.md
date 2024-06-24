@@ -27,3 +27,13 @@ The project uses the following libraries and tools
 
 
   ![good_draw](https://github.com/SHu010117/Virtual-TicTacToe/assets/167242149/1774fee6-ee07-4648-9fce-2090ea7bbb02)
+
+
+- Video Execution
+
+
+
+https://github.com/SHu010117/Virtual-TicTacToe/assets/167242149/c002ab71-dd12-4d83-904b-f8f39eb95736
+
+
+  
