@@ -10,7 +10,7 @@ from torchvision.datasets import ImageFolder
 from torchvision.transforms import ToTensor
 
 '''
-batch_size = 64
+batch_size = 100
 
 transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=1),
@@ -24,7 +24,7 @@ train_data = torchvision.datasets.EMNIST(root='./data', split='letters', train=T
 test_data = torchvision.datasets.EMNIST(root='./data', split='letters', train=False, download=True,
                                         transform=transform)
 train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
-test_dataloader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
+test_dataloader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
 
 
 
@@ -32,27 +32,24 @@ test_dataloader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
 # get the best device for computation
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
-'''
 
-# Passo 3: Definire la struttura della CNN
+'''
 class OurCNN(nn.Module):
     def __init__(self):
         super(OurCNN, self).__init__()
         self.cnn = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(1, 15, kernel_size=4, stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(15, 25, kernel_size=4, stride=1, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
         )
 
         self.mlp = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(12544, 512),
+            nn.Linear(4225, 150),
             nn.ReLU(),
-            nn.Linear(512, 128),
-            nn.ReLU(),
-            nn.Linear(128,27)
+            nn.Linear(150, 27),
 
         )
 
@@ -62,11 +59,10 @@ class OurCNN(nn.Module):
         return x
 
 '''
-
 model = OurCNN().to(device)
 
 # define the hyperparameters
-epochs = 9
+epochs = 4
 learning_rate = 0.001
 
 # define the loss function
@@ -78,10 +74,18 @@ optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 # define the accuracy metric
 metric = torchmetrics.Accuracy(task='multiclass', num_classes=27).to(device)
 
+train_losses = []
+train_accuracies = []
+val_accuracies = []
+
+all_preds = []
+all_labels = []
 
 # defining the training loop
 def train_loop(dataloader, model, loss_fn, optimizer):
     size = len(dataloader.dataset)
+    running_loss = 0.0
+    correct = 0
 
     # get the batch from the dataset
     for batch, (X, y) in enumerate(dataloader):
@@ -99,6 +103,9 @@ def train_loop(dataloader, model, loss_fn, optimizer):
         optimizer.step()
         optimizer.zero_grad()
 
+        # accumulate the loss
+        running_loss += loss.item()
+        correct += metric(pred, y)
         # print some informations
         if batch % 1000 == 0:
             loss_v, current_batch = loss.item(), (batch + 1) * len(X)
@@ -107,7 +114,10 @@ def train_loop(dataloader, model, loss_fn, optimizer):
             print(f'Accuracy on current batch: {acc}')
 
     # print the final accuracy of the model
-    acc = metric.compute()
+    avg_loss = running_loss / len(dataloader)
+    avg_acc = correct / len(dataloader)
+    train_losses.append(avg_loss)
+    train_accuracies.append(avg_acc.cpu().numpy())
     print(f'Final TRAINING Accuracy: {acc}')
     metric.reset()
 
@@ -128,12 +138,18 @@ def test_loop(dataloader, model):
             # get the model predictions
             pred = model(X)
             acc = metric(pred, y)
+            correct += acc
+
+
+            all_preds.extend(pred.argmax(dim=1).cpu().numpy())
+            all_labels.extend(y.cpu().numpy())
 
 
 
     # compute the final accuracy
-    acc = metric.compute()
-    print(f'FINAL TESTING ACCURACY: {acc}')
+    avg_acc = correct / len(dataloader)
+    val_accuracies.append(avg_acc.cpu().numpy())
+    print(f'FINAL TESTING ACCURACY: {avg_acc}')
     metric.reset()
 
 
@@ -145,6 +161,24 @@ for epoch in range(epochs):
     print("Testing...")
     test_loop(test_dataloader, model)
 
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(12, 6))
+plt.plot(train_losses, label='Training Loss')
+plt.title('Loss during Training')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+plt.figure(figsize=(12, 6))
+plt.plot(train_accuracies, label='Training Accuracy')
+plt.plot(val_accuracies, label='Testing Accuracy')
+plt.title('Accuracy during Training and Testing')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
 print("Done!")
-torch.save(model.state_dict(), "./OurCNN.pth")
+torch.save(model.state_dict(), "./OurCNN2.pth")
 '''

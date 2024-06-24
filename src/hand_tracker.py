@@ -67,7 +67,7 @@ class HandTracker:
         '''
         
         # hand tips positions
-        EPSILON = 0.03
+        EPSILON = 0.00
         thumb_tip = hand_landmarks.landmark[self.mp_hands.HandLandmark.THUMB_TIP]
         thumb_mcp = hand_landmarks.landmark[self.mp_hands.HandLandmark.THUMB_MCP]
         index_tip = hand_landmarks.landmark[self.mp_hands.HandLandmark.INDEX_FINGER_TIP]
