@@ -115,9 +115,9 @@ def draw_winner_line(win, result_int, winner, po, px):
     font = pygame.font.Font(PIXELPATH, 25)
     if winner == "Tie":
         if po > px:
-            text = "Tied game: O obtained more points"
+            text = "Tied game: O has more points"
         elif px > po:
-            text = "Tied game: X obtained more points"
+            text = "Tied game: X has more points"
         else:
             text = "Tied game: same points for both"
     elif winner == "O":
@@ -138,13 +138,13 @@ def draw_confirm_window(win,width,height, bg):
     win.blit(bg, (width // 2 - (width // 4), (height // 4)))
 
     font = pygame.font.Font(PIXELPATH, 30)
-    text = font.render('CONFERMA', True, DARK_GREEN)
+    text = font.render('CONFIRM', True, DARK_GREEN)
     win.blit(text, ((width // 2 - (width // 4) + 120), (height // 4) + 40))
 
     win.blit(open_img, ((width // 2 - (width // 4) + text.get_width() + 140), (height // 4) + 30))
 
 
-    text = font.render('CONTINUA', True, DARK_GREEN)
+    text = font.render('CONTINUE', True, DARK_GREEN)
     win.blit(text, ((width // 2 - (width // 4) + 120), (height // 4) + 140))
     win.blit(fist_img, ((width // 2 - (width // 4) + text.get_width() + 140), (height // 4) + 130))
 

@@ -9,7 +9,6 @@ import os
 from model import OurCNN
 from menu import draw_menu
 from game import draw_game, draw_confirm_window, check_winner
-import constants
 
 '''
 In these file we implemented the class TicTacTie which
@@ -34,7 +33,7 @@ class TicTacToeGame:
         # initialize pygame window
         pygame.init()
         pygame.mixer.init()
-        self.WIDTH, self.HEIGHT = constants.WIDTH, constants.HEIGHT
+        self.WIDTH, self.HEIGHT = 1000, 680
         self.WIN = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption('Tic Tac Toe')
 
@@ -48,7 +47,7 @@ class TicTacToeGame:
         self.grid_img = pygame.transform.scale(self.grid_img, (self.WIDTH, self.HEIGHT))
 
         # access model to recognize drawing 
-        self.MODELPATH = os.path.join(self.PARENT_DIR, 'models', 'OurCNN2.pth')
+        self.MODELPATH = os.path.join(self.PARENT_DIR, 'models', 'OurCNN.pth')
         self.PIXELPATH = os.path.join(self.PARENT_DIR, 'assets', 'fonts', 'public-pixel-font', 'PublicPixel-E447g.ttf')
 
         self.FPS = 60
@@ -192,7 +191,6 @@ class TicTacToeGame:
                     self.puntO = (self.puntO + ris) / 2 if self.puntO != 0 else ris
                     self.puntO = round(self.puntO, 2)
                     self.insert_move()
-                    print("Okk")
                     self.winner, self.winning_cells = check_winner(self.grid_array)
                     self.x_prob = self.o_prob = None
                 elif self.x_prob > self.P_MIN and (self.turn % 2) == 1:
@@ -245,8 +243,7 @@ class TicTacToeGame:
         subsurface_array = pygame.surfarray.array3d(subsurface)
         subsurface_array = np.transpose(subsurface_array, (1, 0, 2))
         cropped_image = Image.fromarray(subsurface_array)
-
-        print(self.startCell)
+        
         model = OurCNN().to(device)
         model.load_state_dict(torch.load(self.MODELPATH, map_location=torch.device('cpu')))
         model.eval()
@@ -272,11 +269,6 @@ class TicTacToeGame:
 
         x_prob = round(probabilities_dict[letters[23]].item(), 2)
         o_prob = round(probabilities_dict[letters[14]].item(), 2)
-
-        print("\nProbabilità per ogni lettera:")
-        print(f'{letters[23]} : {probabilities_dict[letters[23]].item():.2f}')
-        print(f'{letters[14]} : {probabilities_dict[letters[14]].item():.2f}')
-
         return o_prob, x_prob
 
     # after recognizing the first drawing, we individuate who(O/X) started first
@@ -295,8 +287,6 @@ class TicTacToeGame:
         if self.grid_array[i][j] == "":
             self.grid_array[i][j] = self.chars[(self.turn % 2)]
             self.turn += 1
-
-        print(self.grid_array)
 
     # if model didn't recognize the drawing, eliminate the drawing
     def remove_draw(self):

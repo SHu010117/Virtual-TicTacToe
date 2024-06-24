@@ -26,7 +26,7 @@ def draw_menu(win, show_text, width, height):
     # Secondary message
     if show_text:
         font = pygame.font.Font(PIXELPATH, 24)
-        text = font.render('Pollice in sù per iniziare', True, DARK_GREEN2)
+        text = font.render('THUMB UP TO START', True, DARK_GREEN2)
         win.blit(text, (width // 2 - text.get_width() // 2, (height // 4) + 65))
 
     # refresh the window
