@@ -1,7 +1,6 @@
 import cv2
 import mediapipe as mp
 import math
-import constants
 import numpy as np
 
 '''
@@ -38,7 +37,7 @@ class HandTracker:
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = self.hands.process(frame_rgb)
         index_pos = None
-        WIDTH, HEIGHT = constants.WIDTH, constants.HEIGHT
+        WIDTH, HEIGHT = 1000, 680
         hand_detected = False
         thumb_up, thumb_down = None, None
         fingers = None

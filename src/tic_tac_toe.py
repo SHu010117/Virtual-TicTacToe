@@ -9,7 +9,6 @@ import os
 from model import OurCNN
 from menu import draw_menu
 from game import draw_game, draw_confirm_window, check_winner
-import constants
 
 '''
 In these file we implemented the class TicTacTie which
@@ -33,7 +32,7 @@ class TicTacToeGame:
         # initialize pygame window
         pygame.init()
         pygame.mixer.init()
-        self.WIDTH, self.HEIGHT = constants.WIDTH, constants.HEIGHT
+        self.WIDTH, self.HEIGHT = 1000, 680
         self.WIN = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption('Tic Tac Toe')
 
