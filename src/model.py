@@ -38,19 +38,19 @@ class OurCNN(nn.Module):
     def __init__(self):
         super(OurCNN, self).__init__()
         self.cnn = nn.Sequential(
-            nn.Conv2d(1, 15, kernel_size=4, stride=1, padding=1),
+            nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(15, 25, kernel_size=4, stride=1, padding=1),
+            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
         )
-
         self.mlp = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(4225, 150),
+            nn.Linear(12544, 512),
             nn.ReLU(),
-            nn.Linear(150, 27),
-
+            nn.Linear(512, 128),
+            nn.ReLU(),
+            nn.Linear(128, 27)
         )
 
     def forward(self, x):
