@@ -32,8 +32,5 @@ The project uses the following libraries and tools
 - Video Execution
 
 
+  https://github.com/SHu010117/Virtual-TicTacToe/assets/167242149/3419a7a1-6cbd-46cf-97a7-dfc4527f86e1
 
-https://github.com/SHu010117/Virtual-TicTacToe/assets/167242149/c002ab71-dd12-4d83-904b-f8f39eb95736
-
-
-  
