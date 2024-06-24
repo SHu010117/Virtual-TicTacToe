@@ -21,6 +21,7 @@ By using the parameters return by function of HandTracker class
  actions to be performed multiple times
 '''
 
+
 class TicTacToeGame:
     def __init__(self):
 
@@ -45,7 +46,7 @@ class TicTacToeGame:
         self.grid_image_path = os.path.join(self.PARENT_DIR, 'assets', 'images', 'background', 'tic.jpg')
         self.grid_img = pygame.image.load(self.grid_image_path)
         self.grid_img = pygame.transform.scale(self.grid_img, (self.WIDTH, self.HEIGHT))
-        
+
         # access model to recognize drawing 
         self.MODELPATH = os.path.join(self.PARENT_DIR, 'models', 'OurCNN2.pth')
         self.PIXELPATH = os.path.join(self.PARENT_DIR, 'assets', 'fonts', 'public-pixel-font', 'PublicPixel-E447g.ttf')
@@ -82,7 +83,7 @@ class TicTacToeGame:
         self.draw = False
 
     def run(self, hand_tracker):
-        
+
         '''
         Function to run the game
         We call the function from HandTracker class which allows us to
@@ -90,7 +91,7 @@ class TicTacToeGame:
         Basing on the gesture detected, the system is able to perform
          the corresponding task
         '''
-        
+
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -124,11 +125,12 @@ class TicTacToeGame:
 
                 # when only index finger's up, start drawing
                 # we used an array to store the coordinates
-                if fingers == [False, True, False, False, False] and not self.menu and not self.match_done and not self.confirm_window:                    
+                if fingers == [False, True, False, False,
+                               False] and not self.menu and not self.match_done and not self.confirm_window:
                     # user can draw only in an empty cell
-                    if not self.isOccupied(self.grid_array, self.index_pos):                        
+                    if not self.isOccupied(self.grid_array, self.index_pos):
                         if not self.drawStart:
-                            self.startCell = self.get_cell(self.index_pos)                     
+                            self.startCell = self.get_cell(self.index_pos)
                             self.drawStart = True
                             self.drawNumber += 1
                             self.draws.append([])
@@ -207,13 +209,14 @@ class TicTacToeGame:
                 self.check_cell = False
 
             self.WIN.blit(self.grid_img, (0, 0))
-            draw_game(self.WIN, self.index_pos, self.draw, self.draws, self.count, self.turn, self.x_prob, self.o_prob, self.P_MIN, self.puntX, self.puntO, self.winning_cells, self.winner, self.match_done)
+            draw_game(self.WIN, self.index_pos, self.draw, self.draws, self.count, self.turn, self.x_prob, self.o_prob,
+                      self.P_MIN, self.puntX, self.puntO, self.winning_cells, self.winner, self.match_done)
             if self.confirm_window:
                 draw_confirm_window(self.WIN, self.WIDTH, self.HEIGHT, self.background_image_small)
             if self.winner:
                 self.match_done = True
             pygame.display.flip()
-    
+
     # reset the values to start a new game
     def new_game(self):
         self.match_done = False
@@ -229,7 +232,7 @@ class TicTacToeGame:
         self.winner = None
         self.winning_cells = None
         self.turn = 0
-    
+
     # predicte the drawing using our CNN model
     def prob_X_O(self):
         device = ('cuda' if torch.cuda.is_available() else 'cpu')
@@ -301,7 +304,7 @@ class TicTacToeGame:
         while count > 0:
             self.draws.pop()
             count -= 1
-    
+
     # finds the boundaries to limit user's move inside the box
     def get_boundaries(self, index, xs, ys):
         i = index // 3
@@ -328,7 +331,7 @@ class TicTacToeGame:
             return 7
         else:
             return 8
-    
+
     # detects if the cell is already used
     def isOccupied(self, grid, index_pos):
         startCell = self.get_cell(index_pos)
@@ -337,4 +340,4 @@ class TicTacToeGame:
         if grid[i][j] == "":
             return False
         else:
-            return True    
+            return True
