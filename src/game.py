@@ -206,7 +206,6 @@ def draw_game(win, index_pos, draw, draws, count, turn, x_prob, o_prob, p_min, p
             text = font.render("It is not you turn. Try again.", True, NICE_RED)
             win.blit(text, (170, 20))
         elif ((turn % 2) == 0 and o_prob <= p_min) or ((turn % 2) == 1 and x_prob <= p_min):
-            # print("entri")
             font = pygame.font.Font(PIXELPATH, 20)
             text = font.render('Your drawing is very bad. Try again.', True, NICE_RED)
             win.blit(text, (170, 20))

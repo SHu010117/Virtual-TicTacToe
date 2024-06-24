@@ -11,7 +11,7 @@ from menu import draw_menu
 from game import draw_game, draw_confirm_window, check_winner
 
 '''
-In these file we implemented the class TicTacTie which
+In this file we implemented the class TicTacTie which
  contains functions that makes the system/game work correctly
 By using the parameters return by function of HandTracker class
  we are able to implement different hand gesture for different 
@@ -86,7 +86,7 @@ class TicTacToeGame:
         '''
         Function to run the game
         We call the function from HandTracker class which allows us to
-         to implement the recognition of hand gestures
+        implement the recognition of hand gestures
         Basing on the gesture detected, the system is able to perform
          the corresponding task
         '''
@@ -234,7 +234,6 @@ class TicTacToeGame:
     # predicte the drawing using our CNN model
     def prob_X_O(self):
         device = ('cuda' if torch.cuda.is_available() else 'cpu')
-        # x, y, width, height = 192, 53, 199, 167
         boundaries = self.get_boundaries(self.startCell, self.x_coordinates, self.y_coordinates)
         x, y = boundaries[0], boundaries[2]
         width, height = boundaries[1] - boundaries[0], boundaries[3] - boundaries[2]

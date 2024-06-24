@@ -62,7 +62,7 @@ class OurCNN(nn.Module):
 model = OurCNN().to(device)
 
 # define the hyperparameters
-epochs = 4
+epochs = 5
 learning_rate = 0.001
 
 # define the loss function
@@ -180,5 +180,5 @@ plt.ylabel('Accuracy')
 plt.legend()
 plt.show()
 print("Done!")
-torch.save(model.state_dict(), "./OurCNN2.pth")
+torch.save(model.state_dict(), "./OurCNN.pth")
 '''
