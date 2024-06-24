@@ -46,7 +46,7 @@ class TicTacToeGame:
         self.grid_img = pygame.transform.scale(self.grid_img, (self.WIDTH, self.HEIGHT))
         
         # access model to recognize drawing 
-        self.MODELPATH = os.path.join(self.PARENT_DIR, 'models', 'OurCNN2.pth')
+        self.MODELPATH = os.path.join(self.PARENT_DIR, 'models', 'OurCNN.pth')
         self.PIXELPATH = os.path.join(self.PARENT_DIR, 'assets', 'fonts', 'public-pixel-font', 'PublicPixel-E447g.ttf')
 
         self.FPS = 60
