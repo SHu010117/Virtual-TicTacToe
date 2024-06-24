@@ -1,7 +1,7 @@
 # Virtual TicTacToe 
 
 ## Overview
-System designed for the simple tic-tac-toe game intergrated with ML which webcam to capture users hand gestures. Users are able to play the game on a virtual grid on screen and do their moves with the hand gesture, the system is able to recognize these gestures through the video camera and perform the corresponding instruction. 
+System designed for the simple tic-tac-toe game intergrated with ML which uses the webcam to capture users hand gestures. Users are able to play the game on a virtual grid on screen and do their moves with the hand gesture, the system is able to recognize these gestures through the video camera and perform the corresponding instruction. 
 
 ## Prerequisites
 The project uses the following libraries and tools
@@ -18,7 +18,12 @@ The project uses the following libraries and tools
 
 ## Sample Output
 - Menu Window
+
+
   ![Menu](https://github.com/SHu010117/Virtual-TicTacToe/assets/167242149/e59ee391-ec62-4fb7-a405-9101f037e474)
 
+
 - Game Window
+
+
   ![good_draw](https://github.com/SHu010117/Virtual-TicTacToe/assets/167242149/1774fee6-ee07-4648-9fce-2090ea7bbb02)
